@@ -59,10 +59,10 @@ namespace cmg {
 		template <typename Msg>
 		auto receiver(const std::string &topic, unsigned wait, const Receiver::Callback<Msg> &callback) -> std::shared_ptr<Receiver> {
 
-			auto client = Socket::Client(topic, this->port_);
+			auto client = Socket::Client(this->port_);
 			this->clients_.emplace(topic, client);
 
-			auto receiver = std::make_shared<SocketReceiver<Msg>>(client, callback);
+			auto receiver = std::make_shared<SocketReceiver<Msg>>(client, topic, callback);
 			return receiver;
 		}
 	};

@@ -10,7 +10,7 @@
 
 #include <memory>
 
-#include "message.hpp"
+#include "messages/message.hpp"
 #include "socket.hpp"
 
 namespace cmg {

@@ -49,10 +49,10 @@ namespace cmg {
 		auto send(const std::string &topic, const std::stringstream &str) -> unsigned long;
 
 		// client port
-		static auto Client(const std::string &topic,  unsigned port, const std::string &address = URL::LOCAL_SOCKET, unsigned wait = 0) -> std::shared_ptr<Socket>;
+		static auto Client(unsigned port, const std::string &address = URL::LOCAL_SOCKET, unsigned wait = 0) -> std::shared_ptr<Socket>;
 
 		auto stopReceive() -> bool;
 
-		auto startReceive(const SsCallback &callback) -> bool;
+		auto startReceive(const std::string &topic, const SsCallback &callback) -> bool;
 	};
 }

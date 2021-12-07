@@ -51,14 +51,10 @@ namespace cmg {
 		}
 
 		template <typename Msg>
-		auto subscribe(const std::string &proc_name_topic, unsigned wait, const Receiver::Callback<Msg> &callback) -> NodeSubscriber {
+		auto subscribe(const std::string &proc_name_topic, unsigned wait, void (*callback)(const std::shared_ptr<Msg>&)) -> NodeSubscriber {
 
 			std::vector<std::string> strs;
 			boost::split(strs, proc_name_topic, boost::is_any_of("/"));
-
-			printf("boost split %s -> %zu\n", proc_name_topic.data(), strs.size());
-			for (auto str : strs)
-				printf("boost split %s -> %s\n", proc_name_topic.data(), str.data());
 
 			auto &server_proc_name = strs[1];
 			auto &topic = strs.back();

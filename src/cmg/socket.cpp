@@ -4,10 +4,10 @@
  */
 #include "socket.hpp"
 
-#include <map>
 #include <sys/endian.h>
 
 #include <cstdio>
+#include <map>
 #include <list>
 #include <sstream>
 #include <stdexcept>
@@ -50,9 +50,7 @@ namespace cmg {
 
 	auto Socket::Server(unsigned port, const std::string &address) -> std::shared_ptr<Socket> {
 
-		printf("port %d\n", port);
-
-		auto socket = std::shared_ptr<Socket>( new Socket(NN_PUB, port, address));
+		auto socket = std::shared_ptr<Socket>(new Socket(NN_PUB, port, address));
 		auto ret = nn_bind(socket->sid_, socket->url_.c_str());
 		if (ret < 0) {
 
@@ -75,14 +73,14 @@ namespace cmg {
 			fprintf(stderr, "socket send failed (%s)\n", error_str);
 			throw  std::runtime_error(error_str);
 		}
-		printf("Socket send: %s\n", str.data());
 
 		return ret - topic.length() - 1;
 	}
 
-	auto Socket::Client(const std::string &topic, unsigned port, const std::string &address, unsigned wait) -> std::shared_ptr<Socket> {
+	auto Socket::Client(unsigned port, const std::string &address, unsigned wait) -> std::shared_ptr<Socket> {
 
 		auto socket = std::shared_ptr<Socket>(new Socket(NN_SUB, port, address, wait));
+
 		auto ret = nn_connect(socket->sid_, socket->url_.c_str());
 		if (ret < 0) {
 
@@ -91,15 +89,6 @@ namespace cmg {
 			throw std::runtime_error(error_str);
 		}
 		printf("Socket connect: %s\n", socket->url_.c_str());
-
-		ret = nn_setsockopt(socket->sid_, NN_SUB, NN_SUB_SUBSCRIBE, topic.c_str(), topic.length());
-		if (ret < 0) {
-
-			auto error_str = nn_strerror(nn_errno());
-			fprintf(stderr, "socket set topic failed (%s)\n", error_str);
-			throw std::runtime_error(error_str);
-		}
-		printf("Socket client set topic: %s\n", topic.data());
 
 		return socket;
 	}
@@ -116,15 +105,26 @@ namespace cmg {
 		return true;
 	}
 
-	auto Socket::startReceive(const SsCallback &callback) -> bool {
+	auto Socket::startReceive(const std::string &topic, const SsCallback &callback) -> bool {
 
 		this->msg_callback_ = callback;
 
-		auto receive_job = [this]() {
+		auto ret = nn_setsockopt(this->sid_, NN_SUB, NN_SUB_SUBSCRIBE, topic.c_str(), topic.length());
+		if (ret < 0) {
+
+			auto error_str = nn_strerror(nn_errno());
+			fprintf(stderr, "socket set topic failed (%s)\n", error_str);
+			throw std::runtime_error(error_str);
+		}
+		printf("Socket client set topic: %s\n", topic.data());
+
+		auto receive_job = [this, topic]() {
+
+			auto head_len = topic.length() + 1;
 
 			while (!this->exit_receive_) {
 
-				void * buf = nullptr;
+				void *buf = nullptr;
 				auto len = nn_recv(this->sid_, &buf, NN_MSG, 0);
 				if (len < 0) {
 
@@ -133,15 +133,18 @@ namespace cmg {
 					continue;
 				}
 
+				const char *msg = static_cast<char*>(buf) + head_len;
+				len = len - head_len;
+
 				if (len == sizeof(u_int32_t)) {
 
-					auto code = ntohl(*static_cast<uint32_t*>(buf));
+					auto code = ntohl(*reinterpret_cast<const uint32_t*>(msg));
 					if (code == Socket::CODE_EXIT)
 						break;
 				}
 
 				std::stringstream ss;
-				ss.write(static_cast<const char *>(buf), len);
+				ss.write(static_cast<const char *>(msg), len);
 				this->msg_callback_(ss);
 
 				nn_freemsg(buf);

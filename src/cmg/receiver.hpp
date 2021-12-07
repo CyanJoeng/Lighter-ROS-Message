@@ -7,7 +7,7 @@
 #include <memory>
 #include <sstream>
 
-#include "message.hpp"
+#include "messages/message.hpp"
 #include "socket.hpp"
 
 namespace cmg {
@@ -35,10 +35,10 @@ namespace cmg {
 		Callback<Msg> callback_;
 
 	public:
-		SocketReceiver(std::shared_ptr<Socket> &socket, const Callback<Msg> &callback)
+		SocketReceiver(std::shared_ptr<Socket> &socket, const std::string &topic, const Callback<Msg> &callback)
 			: callback_(callback) {
 
-			socket->startReceive([this](std::stringstream &ss) {
+			socket->startReceive(topic, [this](std::stringstream &ss) {
 
 					this->receive(ss);
 					});
