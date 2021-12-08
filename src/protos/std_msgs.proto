@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package cmg_pb;
+
+message Header {
+
+	double stamp_sec = 1;
+	string frame_id = 2;
+}

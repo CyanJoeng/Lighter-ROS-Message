@@ -9,6 +9,7 @@ add_subdirectory(src)
 
 include_directories(
 	src
+	${CMAKE_CURRENT_BINARY_DIR}/src/message
 	${CMAKE_CURRENT_BINARY_DIR}/src
 	)
 add_subdirectory(test)
