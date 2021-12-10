@@ -4,7 +4,7 @@
  */
 #include "socket.hpp"
 
-#include <sys/endian.h>
+#include <arpa/inet.h>
 
 #include <cstdio>
 #include <map>

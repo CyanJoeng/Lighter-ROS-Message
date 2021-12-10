@@ -7,7 +7,7 @@ set(OpenCV_DIR $ENV{HOME}/.OpenCV/sdk/native/jni)
 find_package(nanomsg REQUIRED)
 find_package(Boost REQUIRED)
 find_package(Protobuf 3 REQUIRED)
-find_package(OpenCV 4 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 include_directories(
 	${nanomsg_INCDIR}
@@ -42,7 +42,6 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} 
 	nanomsg
 	${Boost_LIBRARIES}
-	${Protobuf_LIBRARIES}
 	${OpenCV_LIBS}
 
 	proto_msg

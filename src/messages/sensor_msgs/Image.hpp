@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include <memory>
+
 #include <opencv2/core/mat.hpp>
 
 #include "messages/message.hpp"

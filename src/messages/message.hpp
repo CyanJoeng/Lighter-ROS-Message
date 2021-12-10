@@ -47,7 +47,7 @@ namespace cmg {
 			long len = in.tellg();
 			in.seekg(0);
 
-			in.read(this->data_.data(), len);
+			in.read((char*)this->data_.data(), len);
 
 			if (in.gcount() != len) {
 

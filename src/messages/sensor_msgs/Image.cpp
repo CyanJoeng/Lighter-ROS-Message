@@ -44,9 +44,9 @@ namespace sensor_msgs{
 		int rows = msg.height();
 		int cols = msg.width();
 		int type = msg.type();
-		void *data = msg.mutable_data()->data();
+		auto *data = msg.mutable_data()->data();
 
-		this->image = cv::Mat(rows, cols, type, data).clone();
+		this->image = cv::Mat(rows, cols, type, (void*)data).clone();
 
 		return msg.ByteSizeLong();
 	}
