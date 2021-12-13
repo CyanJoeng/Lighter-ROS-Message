@@ -10,7 +10,7 @@
 #include "messages/std_msgs/Header.hpp"
 #include "messages/geometry_msgs/point32.hpp"
 
-namespace sensor_msgs {
+namespace cmg { namespace sensor_msgs {
 
 	struct ChannelFloat32 {
 
@@ -33,4 +33,4 @@ namespace sensor_msgs {
 
 
 	using PointCloudPtr = std::shared_ptr<PointCloud>;
-}
+}}

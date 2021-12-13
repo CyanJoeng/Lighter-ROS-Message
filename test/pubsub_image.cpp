@@ -9,6 +9,8 @@
 #include "cmg/cmg.hpp"
 #include "messages/sensor_msgs/Image.hpp"
 
+using namespace cmg;
+
 auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 
 	sensor_msgs::ImagePtr image(new sensor_msgs::Image);
@@ -24,16 +26,17 @@ auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 
 auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
 
-	printf("cb image size (%d, %d) stamp %f\n", image->image.rows, image->image.cols, image->header.stamp.toSec());
+	auto image_ = &image->image;
+	printf("cb image size (%d, %d) stamp %f\n", image_->rows, image_->cols, image->header.stamp.toSec());
 
-	cv::imwrite("image.png", image->image);
+	cv::imwrite("image.png", *image_);
 	printf("write image to image.png\n");
 }
 
 int main(int argc, char *argv[]) {
 
-	const auto server_proc_name = "server";
-	const auto client_proc_name = "client";
+	std::string server_proc_name = "server";
+	std::string client_proc_name = "client";
 
 	std::string mode = argv[1];
 
@@ -41,7 +44,7 @@ int main(int argc, char *argv[]) {
 
 		std::string img_path = argv[2];
 
-		cmg::init(argc, argv, server_proc_name);
+		cmg::init(argc, argv, server_proc_name.c_str());
 
 		cmg::NodeHandle n("~");
 
@@ -59,11 +62,18 @@ int main(int argc, char *argv[]) {
 
 	} else if (mode == "c") {
 
-		cmg::init(argc, argv, client_proc_name);
+		std::string topic = "foo";
+
+		if (argc > 2)
+			client_proc_name = argv[2];
+		if (argc > 3)
+			topic = argv[3];
+
+		cmg::init(argc, argv, client_proc_name.c_str());
 
 		cmg::NodeHandle n("~");
 
-		std::string proc_topic = "/server/foo";
+		std::string proc_topic = "/" + client_proc_name + "/" + topic;
 
 		auto sub = n.subscribe(proc_topic, 1000, cb);
 		cmg::spin();

@@ -13,6 +13,8 @@
 #include <memory>
 
 
+using namespace cmg;
+
 auto create_point_cloud() -> sensor_msgs::PointCloudPtr {
 
 	sensor_msgs::PointCloudPtr feature_points(new sensor_msgs::PointCloud);

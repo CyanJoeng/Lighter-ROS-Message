@@ -7,7 +7,7 @@
 
 #include "protos/foo_bar.pb.h"
 
-namespace example_msgs {
+namespace cmg { namespace example_msgs {
 
 	class FooBarMessage : public cmg::Message {
 
@@ -21,4 +21,4 @@ namespace example_msgs {
 
 		virtual auto parse(std::istream &in) -> unsigned long final; 
 	};
-}
+}}

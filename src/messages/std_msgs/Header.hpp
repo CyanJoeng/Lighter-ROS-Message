@@ -5,7 +5,8 @@
 #pragma once
 
 #include <string>
-namespace std_msgs {
+
+namespace cmg { namespace std_msgs {
 
 	struct Header {
 
@@ -18,4 +19,4 @@ namespace std_msgs {
 
 		std::string frame_id{""};
 	};
-}
+}}

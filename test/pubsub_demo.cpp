@@ -7,6 +7,7 @@
 #include "messages/message.hpp"
 #include <thread>
 
+using namespace cmg;
 
 void cb0(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
 

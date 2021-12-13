@@ -7,7 +7,7 @@
 
 #include "protos/sensor_msgs.pb.h"
 
-namespace sensor_msgs {
+namespace cmg { namespace sensor_msgs {
 
 	auto PointCloud::serialize(std::ostream &out) -> unsigned long {
 
@@ -77,4 +77,4 @@ namespace sensor_msgs {
 
 		return msg.ByteSizeLong();
 	}
-}
+}}

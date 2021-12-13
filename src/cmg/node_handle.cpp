@@ -13,6 +13,9 @@ namespace cmg {
 
 	auto Publisher::publish(const std::shared_ptr<Message> &msg) -> bool {
 
+		if (!this->sender_)
+			return false;
+
 		return this->sender_->send(msg);
 	}
 

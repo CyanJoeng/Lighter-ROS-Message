@@ -5,7 +5,7 @@
 #include "foo_bar.hpp"
 #include <cstdio>
 
-namespace example_msgs {
+namespace cmg { namespace example_msgs {
 
 	FooBarMessage::FooBarMessage(int id, const std::string &extra) {
 
@@ -33,4 +33,4 @@ namespace example_msgs {
 			printf("FooBar parse failed\n");
 		return 0;
 	}
-}
+}}

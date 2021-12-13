@@ -25,6 +25,8 @@ namespace cmg {
 			std::shared_ptr<Sender> sender_;
 
 		public:
+			NodePublisher() = default;
+
 			NodePublisher(const std::shared_ptr<Sender> &sender);
 
 			auto publish(const std::shared_ptr<Message> &msg) -> bool;

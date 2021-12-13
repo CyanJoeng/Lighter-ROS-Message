@@ -5,7 +5,7 @@
 #include "Image.hpp"
 #include "protos/sensor_msgs.pb.h"
 
-namespace sensor_msgs{
+namespace cmg { namespace sensor_msgs{
 
 	auto Image::serialize(std::ostream &out) -> unsigned long {
 
@@ -50,4 +50,4 @@ namespace sensor_msgs{
 
 		return msg.ByteSizeLong();
 	}
-}
+}}
