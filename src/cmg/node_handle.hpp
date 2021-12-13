@@ -61,6 +61,8 @@ namespace cmg {
 			auto &server_proc_name = strs[1];
 			auto &topic = strs.back();
 
+			printf("subscribe to %s/%s\n", server_proc_name.c_str(), topic.c_str());
+
 			return NodeSubscriber(Enviroment::Inst(server_proc_name).receiver<Msg>(topic, wait, callback));
 		}
 	};

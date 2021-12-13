@@ -3,13 +3,20 @@
  * Date: Wed Dec  8 16:33:46 CST 2021
  */
 #include <cstdio>
+#include <mutex>
+#include <thread>
+
 #include <opencv2/imgcodecs.hpp>
-#include <protos/foo_bar.pb.h>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "cmg/cmg.hpp"
+#include "protos/foo_bar.pb.h"
 #include "messages/sensor_msgs/Image.hpp"
 
 using namespace cmg;
+
+bool with_gui = true;
 
 auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 
@@ -19,18 +26,51 @@ auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 	image->header.frame_id = "world";
 	image->header.stamp.time_ = (rand() % 1000 * 1e-3);
 
-	image->image = cv::imread(img_path, cv::IMREAD_ANYCOLOR);
+	static auto ori_img = cv::imread(img_path, cv::IMREAD_ANYCOLOR);
+
+	cv::Mat img = ori_img.clone();
+	cv::putText(img, "stamp: " + std::to_string(image->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., {255, 255, 0}, 2);
+	image->image = img;
 
 	return image;
 }
 
+static cv::Mat show_img;
+static std::mutex img_mt;
+static std::thread work_loop;
+
+void ui_refresh() {
+
+	while (true) {
+
+		if (!show_img.empty()) {
+
+			{
+				std::lock_guard<std::mutex> lock(img_mt);
+
+				cv::imshow("callback", show_img);
+			}
+			cv::waitKey(10);
+		}
+
+		std::this_thread::sleep_for(std::chrono::duration<double>(.1));
+	}
+}
+
 auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
 
-	auto image_ = &image->image;
-	printf("cb image size (%d, %d) stamp %f\n", image_->rows, image_->cols, image->header.stamp.toSec());
+	printf("cb image size (%d, %d) stamp %f\n", image->image.rows, image->image.cols, image->header.stamp.toSec());
 
-	cv::imwrite("image.png", *image_);
-	printf("write image to image.png\n");
+	if (with_gui) {
+
+		std::lock_guard<std::mutex> lock(img_mt);
+		show_img = image->image;
+
+	} else {
+
+		cv::imwrite("image.png", image->image);
+		printf("write image to image.png\n");
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -50,7 +90,7 @@ int main(int argc, char *argv[]) {
 
 		auto pub_point_cloud = n.advertise<sensor_msgs::Image>("foo", 1000);
 
-		for (auto i = 0; i < 10;++i) {
+		for (auto i = 0; i >= 0; ++i) {
 
 			auto msg_point_cloud = create_image(img_path);
 			pub_point_cloud.publish(msg_point_cloud);
@@ -65,7 +105,7 @@ int main(int argc, char *argv[]) {
 		std::string topic = "foo";
 
 		if (argc > 2)
-			client_proc_name = argv[2];
+			server_proc_name = argv[2];
 		if (argc > 3)
 			topic = argv[3];
 
@@ -73,10 +113,16 @@ int main(int argc, char *argv[]) {
 
 		cmg::NodeHandle n("~");
 
-		std::string proc_topic = "/" + client_proc_name + "/" + topic;
+		std::string proc_topic = "/" + server_proc_name + "/" + topic;
 
-		auto sub = n.subscribe(proc_topic, 1000, cb);
-		cmg::spin();
+		work_loop = std::thread {
+			[&]() {
+
+				auto sub = n.subscribe(proc_topic, 1000, cb);
+				cmg::spin();
+			}
+		};
+		ui_refresh();
 	}
 
 	google::protobuf::ShutdownProtobufLibrary();
