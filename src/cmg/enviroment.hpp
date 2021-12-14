@@ -30,7 +30,7 @@ namespace cmg {
 		std::map<std::string, std::shared_ptr<Socket>> clients_;
 
 	private:
-		static std::map<std::string, Enviroment> insts;
+		static std::map<std::string, Environment> insts;
 
 	public:
 		static auto Inst(const std::string &proc_name = "") -> Environment&;

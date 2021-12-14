@@ -44,8 +44,10 @@ namespace cmg {
 
 			{
 				std::lock_guard<std::mutex> lck(env_mt);
-				insts.emplace(proc_name, Environment(proc_name));
-				insts.proc_name_ = proc_name;
+
+				auto inst = Environment(proc_name);
+				inst.proc_name_ = proc_name;
+				insts.emplace(proc_name, inst);
 				env_cv.notify_all();
 			}
 
