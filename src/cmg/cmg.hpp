@@ -8,7 +8,7 @@
 
 namespace cmg {
 
-	int init(int argc, const char *argv[], const char *proc_name);
+	int init(int argc, char *argv[], const char *proc_name);
 
 	void spin();
 };

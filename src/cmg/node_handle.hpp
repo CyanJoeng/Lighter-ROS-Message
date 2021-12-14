@@ -56,6 +56,8 @@ namespace cmg {
 		template <typename Msg>
 		auto subscribe(const std::string &proc_name_topic, unsigned wait, void (*callback)(const std::shared_ptr<Msg>&)) -> NodeSubscriber {
 
+			printf("subscribe proc_topic %s\n", proc_name_topic.c_str());
+
 			std::vector<std::string> strs;
 //			boost::split(strs, proc_name_topic, boost::is_any_of("/"));
 
@@ -63,8 +65,15 @@ namespace cmg {
             while (!str.empty()) {
 
             	auto pos = str.find('/');
-            	strs.push_back(str.substr(0, pos));
-            	str = str.substr(pos);
+				if (pos != -1) {
+
+					strs.push_back(str.substr(0, pos));
+					str = str.substr(pos + 1);
+				} else {
+				
+					strs.push_back(str);
+					break;
+				}
             }
 
 			auto &server_proc_name = strs[1];
