@@ -5,8 +5,7 @@
 #pragma once
 
 #include <memory>
-
-#include <opencv2/core/core.hpp>
+#include <vector>
 
 #include "messages/message.hpp"
 #include "messages/std_msgs/Header.hpp"
@@ -17,11 +16,20 @@ namespace cmg { namespace sensor_msgs {
 
 		std_msgs::Header header;
 
-		cv::Mat image;
+		//cv::Mat image;
+
+		int rows{0};
+		int cols{0};
+
+		int type{0};
+
+		std::vector<char> data;
 	
 		virtual auto serialize(std::ostream &out) -> unsigned long final;
 
 		virtual auto parse(std::istream &in) -> unsigned long final;
+
+		auto setData(int rows, int cols, char *data) -> int;
 	};
 
 	using ImagePtr = std::shared_ptr<Image>;

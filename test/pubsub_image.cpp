@@ -6,6 +6,7 @@
 #include <mutex>
 #include <thread>
 
+#include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -16,7 +17,7 @@
 
 using namespace cmg;
 
-bool with_gui = true;
+bool save_img = true;
 
 auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 
@@ -29,8 +30,17 @@ auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 	static auto ori_img = cv::imread(img_path, cv::IMREAD_ANYCOLOR);
 
 	cv::Mat img = ori_img.clone();
-	cv::putText(img, "stamp: " + std::to_string(image->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., {255, 255, 0}, 2);
-	image->image = img;
+
+	printf("cv point %d\n", img.rows/2);
+	cv::putText(img, "stamp: " + std::to_string(image->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 10., cv::Scalar {255, 255, 0}, 2);
+	cv::imwrite("out/img.png", img);
+
+	img(cv::Rect(0, 0, 30, 30)) = cv::Mat::ones(30, 30, CV_8UC3) * 128;
+	cv::imwrite("out/image.png", img);
+
+	cv::Mat data;
+	img.copyTo(data);
+	image->setData(img.rows, img.cols, (char*)data.data);
 
 	return image;
 }
@@ -59,16 +69,18 @@ void ui_refresh() {
 
 auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
 
-	printf("cb image size (%d, %d) stamp %f\n", image->image.rows, image->image.cols, image->header.stamp.toSec());
+	printf("cb image size (%d, %d) stamp %f\n", image->rows, image->cols, image->header.stamp.toSec());
 
-	if (with_gui) {
+	{
 
 		std::lock_guard<std::mutex> lock(img_mt);
-		show_img = image->image;
+		show_img = cv::Mat(image->rows, image->cols, CV_8UC3, (void*)image->data.data());
+	}
+	if (save_img) {
 
-	} else {
-
-		cv::imwrite("image.png", image->image);
+		char path[64];
+		sprintf(path, "out/image_%.5f.png", image->header.stamp.toSec());
+		cv::imwrite(path, show_img);
 		printf("write image to image.png\n");
 	}
 }

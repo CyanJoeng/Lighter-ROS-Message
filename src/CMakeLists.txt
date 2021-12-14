@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 find_package(nanomsg REQUIRED)
 # find_package(Boost REQUIRED)
-find_package(OpenCV 4 REQUIRED)
+#find_package(OpenCV 4 REQUIRED)
 
 include_directories(
 	${nanomsg_INCDIR}
@@ -47,7 +47,7 @@ add_library(${PROJECT_NAME} SHARED
 target_link_libraries(${PROJECT_NAME} 
 	nanomsg
 	${Boost_LIBRARIES}
-	${OpenCV_LIBS}
+	#${OpenCV_LIBS}
 
 	proto_msg
 	)
