@@ -1,20 +1,23 @@
 project(cmg)
 
-set(nanomsg_DIR $ENV{PREFIX}/local/lib/cmake/nanomsg-1.1.5)
-set(Boost_DIR $ENV{PREFIX}/lib/cmake/Boost-1.77.0)
+if (NOT DEFINED nanomsg_DIR)
+	set(nanomsg_DIR $ENV{PREFIX}/local/lib/cmake/nanomsg-1.1.5)
+endif()
+
+if(NOT DEFINED Boost_DIR)
+	set(Boost_DIR $ENV{PREFIX}/lib/cmake/Boost-1.77.0)
+endif()
 #set(OpenCV_DIR $ENV{HOME}/.OpenCV/sdk/native/jni)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 find_package(nanomsg REQUIRED)
-find_package(Boost REQUIRED)
-find_package(Protobuf 3 REQUIRED)
+# find_package(Boost REQUIRED)
 find_package(OpenCV 4 REQUIRED)
 
 include_directories(
 	${nanomsg_INCDIR}
 	${Boost_INCLUDE_DIRS}
-	${Protobuf_INCLUDE_DIRS}
 	${OpenCV_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}

@@ -13,12 +13,12 @@
 
 namespace cmg {
 
-	class Enviroment {
+	class Environment {
 	public:
 		static constexpr auto MULTI_PROC_NAME = "~";
 
 	private:
-		Enviroment(const std::string &proc_name);
+		Environment(const std::string &proc_name);
 
 	private:
 		std::string proc_name_;
@@ -33,7 +33,7 @@ namespace cmg {
 		static std::map<std::string, Enviroment> insts;
 
 	public:
-		static auto Inst(const std::string &proc_name = "") -> Enviroment&;
+		static auto Inst(const std::string &proc_name = "") -> Environment&;
 
 		static void Spin();
 
@@ -41,7 +41,7 @@ namespace cmg {
 		static auto PortFromKey(const std::string &key) -> unsigned;
 
 	public:
-		~Enviroment();
+		~Environment();
 
 		template <typename Msg>
 		auto sender(const std::string &topic, unsigned wait) -> std::shared_ptr<Sender> {

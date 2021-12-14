@@ -36,12 +36,12 @@ bool init_prococess_port(const std::string& cfg_file_path) {
 
 int cmg::init(int argc, char **argv, const char *proc_name) {
 
-	Enviroment::Inst(proc_name);
+	Environment::Inst(proc_name);
 
 	return 0;
 }
 
 void cmg::spin() {
 
-	Enviroment::Spin();
+	Environment::Spin();
 }

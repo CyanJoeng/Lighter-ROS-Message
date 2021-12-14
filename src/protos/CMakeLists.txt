@@ -1,5 +1,7 @@
 project(proto_msg)
 
+find_package(Protobuf 3 REQUIRED)
+
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS 
 	foo_bar.proto
 	std_msgs.proto
@@ -7,10 +9,10 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 	sensor_msgs.proto
 	)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
 	${PROTO_SRCS}
 	)
 
-target_link_libraries(${PROJECT_NAME} 
-	${Protobuf_LIBRARIES}
+target_link_libraries(${PROJECT_NAME}
+	${Protobuf_LIBRARIES} log
 	)

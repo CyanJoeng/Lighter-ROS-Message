@@ -16,27 +16,27 @@ namespace cmg {
 	static std::mutex env_mt;
 	static std::condition_variable env_cv;
 
-	std::map<std::string, Enviroment> Enviroment::insts;
+	std::map<std::string, Environment> Environment::insts;
 
 
-	Enviroment::Enviroment(const std::string &proc_name)
+	Environment::Environment(const std::string &proc_name)
 		: proc_name_(proc_name) {}
 
-	Enviroment::~Enviroment() {
+	Environment::~Environment() {
 
 	}
 
-	auto Enviroment::Inst(const std::string &proc_name) -> Enviroment& {
+	auto Environment::Inst(const std::string &proc_name) -> Environment& {
 
 		for (auto [str, env] : insts)
-			printf("Enviroment Inst insts %s, %d\n", str.data(), env.port_);
+			printf("Environment Inst insts %s, %d\n", str.data(), env.port_);
 
-		printf("Enviroment Inst proc name %s\n", proc_name.data());
+		printf("Environment Inst proc name %s\n", proc_name.data());
 
-		if (proc_name == Enviroment::MULTI_PROC_NAME) {
+		if (proc_name == Environment::MULTI_PROC_NAME) {
 
 			if (insts.empty())
-				throw std::domain_error("Enviroment not inited with a specific proc_name");
+				throw std::domain_error("Environment not inited with a specific proc_name");
 			return insts.begin()->second;
 		}
 
@@ -44,12 +44,13 @@ namespace cmg {
 
 			{
 				std::lock_guard<std::mutex> lck(env_mt);
-				insts.emplace(proc_name, Enviroment(proc_name));
+				insts.emplace(proc_name, Environment(proc_name));
+				insts.proc_name_ = proc_name;
 				env_cv.notify_all();
 			}
 
-			auto proc_port = Enviroment::PortFromKey(proc_name);
-			printf("Enviroment Inst proc_name to proc_port %s -> %d\n", proc_name.data(), proc_port);
+			auto proc_port = Environment::PortFromKey(proc_name);
+			printf("Environment Inst proc_name to proc_port %s -> %d\n", proc_name.data(), proc_port);
 
 			insts.at(proc_name).port_ = proc_port;
 		}
@@ -57,18 +58,18 @@ namespace cmg {
 		return insts.at(proc_name);
 	}
 
-	void Enviroment::Spin() {
+	void Environment::Spin() {
 
 		std::unique_lock<std::mutex> lck(env_mt);
 		env_cv.wait(lck, []() {
 
 				std::lock_guard<std::mutex> lck(env_mt);
 
-				return Enviroment::insts.empty();
+				return Environment::insts.empty();
 			});
 	}
 
-	auto Enviroment::PortFromKey(const std::string &key) -> unsigned {
+	auto Environment::PortFromKey(const std::string &key) -> unsigned {
 
 		auto it = URL::proc_ports.find(key);
 		if (it == URL::proc_ports.end()) {
@@ -76,7 +77,7 @@ namespace cmg {
 			throw std::out_of_range("proc name not registed\n");
 		}
 
-		printf("Enviroment PortFromKey: use key (%s) -> port (%d)\n", key.data(), it->second);
+		printf("Environment PortFromKey: use key (%s) -> port (%d)\n", key.data(), it->second);
 
 		return it->second;
 	}

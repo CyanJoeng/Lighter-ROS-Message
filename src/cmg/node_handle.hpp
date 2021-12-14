@@ -8,8 +8,9 @@
 #include <string>
 #include <memory>
 #include <list>
+#include <vector>
 
-#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string.hpp>
 
 #include "enviroment.hpp"
 #include "receiver.hpp"
@@ -49,21 +50,29 @@ namespace cmg {
 		template <typename Msg>
 		auto advertise(const std::string &topic, unsigned wait) -> NodePublisher {
 
-			return NodePublisher(Enviroment::Inst(this->proc_name_).sender<Msg>(topic, wait));
+			return NodePublisher(Environment::Inst(this->proc_name_).sender<Msg>(topic, wait));
 		}
 
 		template <typename Msg>
 		auto subscribe(const std::string &proc_name_topic, unsigned wait, void (*callback)(const std::shared_ptr<Msg>&)) -> NodeSubscriber {
 
 			std::vector<std::string> strs;
-			boost::split(strs, proc_name_topic, boost::is_any_of("/"));
+//			boost::split(strs, proc_name_topic, boost::is_any_of("/"));
+
+            std::string str = proc_name_topic;
+            while (!str.empty()) {
+
+            	auto pos = str.find('/');
+            	strs.push_back(str.substr(0, pos));
+            	str = str.substr(pos);
+            }
 
 			auto &server_proc_name = strs[1];
 			auto &topic = strs.back();
 
 			printf("subscribe to %s/%s\n", server_proc_name.c_str(), topic.c_str());
 
-			return NodeSubscriber(Enviroment::Inst(server_proc_name).receiver<Msg>(topic, wait, callback));
+			return NodeSubscriber(Environment::Inst(server_proc_name).receiver<Msg>(topic, wait, callback));
 		}
 	};
 
