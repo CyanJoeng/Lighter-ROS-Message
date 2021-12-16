@@ -32,7 +32,7 @@ auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 	cv::Mat img = ori_img.clone();
 
 	printf("cv point %d\n", img.rows/2);
-	cv::putText(img, "stamp: " + std::to_string(image->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 10., cv::Scalar {255, 255, 0}, 2);
+	cv::putText(img, "stamp: " + std::to_string(image->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
 	cv::imwrite("out/img.png", img);
 
 	img(cv::Rect(0, 0, 30, 30)) = cv::Mat::ones(30, 30, CV_8UC3) * 128;
@@ -40,7 +40,7 @@ auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 
 	cv::Mat data;
 	img.copyTo(data);
-	image->setData(img.rows, img.cols, (char*)data.data);
+	image->setData(img.rows, img.cols, img.channels(), (char*)data.data);
 
 	return image;
 }
@@ -74,7 +74,7 @@ auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
 	{
 
 		std::lock_guard<std::mutex> lock(img_mt);
-		show_img = cv::Mat(image->rows, image->cols, CV_8UC3, (void*)image->data.data());
+		show_img = cv::Mat(image->rows, image->cols, CV_8UC(image->channels), (void*)image->data.data());
 	}
 	if (save_img) {
 

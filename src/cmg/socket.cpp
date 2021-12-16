@@ -64,6 +64,9 @@ namespace cmg {
 	}
 
 	auto Socket::send(const std::string &topic, const std::stringstream &ss) -> unsigned long {
+
+		auto subs = (uint32_t) nn_get_statistic (this->sid_, NN_STAT_CURRENT_CONNECTIONS);
+		printf("Socket %s clients %d\n", this->url_.c_str(), subs);
 		
 		auto str = topic + '|' + ss.str();
 		auto ret = nn_send(this->sid_, str.c_str(), str.length(), 0);
@@ -73,6 +76,8 @@ namespace cmg {
 			fprintf(stderr, "socket send failed (%s)\n", error_str);
 			throw  std::runtime_error(error_str);
 		}
+
+		printf("Socket send: [%s] len %d\n", topic.c_str(), ret);
 
 		return ret - topic.length() - 1;
 	}
@@ -109,7 +114,7 @@ namespace cmg {
 
 		this->msg_callback_ = callback;
 
-		auto ret = nn_setsockopt(this->sid_, NN_SUB, NN_SUB_SUBSCRIBE, topic.c_str(), topic.length());
+		auto ret = nn_setsockopt(this->sid_, NN_SUB, NN_SUB_SUBSCRIBE, topic.c_str(), 0);
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
@@ -126,6 +131,8 @@ namespace cmg {
 
 				void *buf = nullptr;
 				auto len = nn_recv(this->sid_, &buf, NN_MSG, 0);
+				
+				printf("Receiver receive len %d\n", len);
 				if (len < 0) {
 
 					auto error_str = nn_strerror(nn_errno());
@@ -139,8 +146,11 @@ namespace cmg {
 				if (len == sizeof(u_int32_t)) {
 
 					auto code = ntohl(*reinterpret_cast<const uint32_t*>(msg));
-					if (code == Socket::CODE_EXIT)
+					if (code == Socket::CODE_EXIT) {
+
+						printf("Receiver receive exit code %d\n", code);
 						break;
+					}
 				}
 
 				std::stringstream ss;
@@ -149,6 +159,8 @@ namespace cmg {
 
 				nn_freemsg(buf);
 			}
+
+			printf("Receiver exit\n");
 		};
 
 		this->stopReceive();

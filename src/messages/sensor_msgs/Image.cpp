@@ -19,8 +19,8 @@ namespace cmg { namespace sensor_msgs{
 
 		msg.set_height(this->rows);
 		msg.set_width(this->cols);
-		msg.set_type(this->type);
-		auto len = this->rows * this->cols * 3;
+		msg.set_channels(this->channels);
+		auto len = this->rows * this->cols * this->channels;
 		msg.set_data(this->data.data(), len);
 
 		if (msg.SerializePartialToOstream(&out))
@@ -45,20 +45,21 @@ namespace cmg { namespace sensor_msgs{
 
 		this->rows = msg.height();
 		this->cols = msg.width();
-		this->type = msg.type();
+		this->channels = msg.channels();
 		auto *data = msg.mutable_data()->data();
-		this->data.resize(this->rows * this->cols * 3);
+		this->data.resize(this->rows * this->cols * this->channels);
 		memcpy(this->data.data(), data, this->data.size());
 
 		return msg.ByteSizeLong();
 	}
 
-	auto Image::setData(int rows, int cols, char *data) -> int {
+	auto Image::setData(int rows, int cols, int channels, char *data) -> int {
 
 		this->rows = rows;
 		this->cols = cols;
+		this->channels = channels;
 
-		this->data.resize(this->rows * this->cols * 3);
+		this->data.resize(this->rows * this->cols * this->channels);
 		std::copy(data, data + this->data.size(), this->data.begin());
 
 		return this->data.size();

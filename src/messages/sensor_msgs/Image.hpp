@@ -21,7 +21,7 @@ namespace cmg { namespace sensor_msgs {
 		int rows{0};
 		int cols{0};
 
-		int type{0};
+		int channels{0};
 
 		std::vector<char> data;
 	
@@ -29,7 +29,7 @@ namespace cmg { namespace sensor_msgs {
 
 		virtual auto parse(std::istream &in) -> unsigned long final;
 
-		auto setData(int rows, int cols, char *data) -> int;
+		auto setData(int rows, int cols, int channels, char *data) -> int;
 	};
 
 	using ImagePtr = std::shared_ptr<Image>;

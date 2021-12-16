@@ -15,7 +15,7 @@ namespace cmg {
 
 		static std::map<std::string, unsigned> proc_ports;
 
-		static constexpr auto LOCAL_SOCKET = "tcp://127.0.0.1";
+		static constexpr auto LOCAL_SOCKET = "tcp://0.0.0.0";
 
 		static auto Build(const std::string &address, unsigned port) -> const std::string;
 	};

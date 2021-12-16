@@ -4,6 +4,7 @@
  */
 #include "node_handle.hpp"
 
+#include <cstdio>
 #include <string>
 
 namespace cmg {
@@ -13,8 +14,11 @@ namespace cmg {
 
 	auto Publisher::publish(const std::shared_ptr<Message> &msg) -> bool {
 
-		if (!this->sender_)
+		if (!this->sender_) {
+
+			printf("Publisher publish: sender not set\n");
 			return false;
+		}
 
 		return this->sender_->send(msg);
 	}
