@@ -6,6 +6,7 @@
 #include <sstream>
 #include <thread>
 #include <map>
+#include <functional>
 
 namespace cmg {
 

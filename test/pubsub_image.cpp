@@ -33,10 +33,8 @@ auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 
 	printf("cv point %d\n", img.rows/2);
 	cv::putText(img, "stamp: " + std::to_string(image->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
-	cv::imwrite("out/img.png", img);
 
 	img(cv::Rect(0, 0, 30, 30)) = cv::Mat::ones(30, 30, CV_8UC3) * 128;
-	cv::imwrite("out/image.png", img);
 
 	cv::Mat data;
 	img.copyTo(data);
@@ -74,7 +72,7 @@ auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
 	{
 
 		std::lock_guard<std::mutex> lock(img_mt);
-		show_img = cv::Mat(image->rows, image->cols, CV_8UC(image->channels), (void*)image->data.data());
+		cv::Mat(image->rows, image->cols, CV_8UC(image->channels), (void*)image->data.data()).copyTo(show_img);
 	}
 	if (save_img) {
 
@@ -100,14 +98,21 @@ int main(int argc, char *argv[]) {
 
 		cmg::NodeHandle n("~");
 
-		auto pub_point_cloud = n.advertise<sensor_msgs::Image>("foo", 1000);
+		auto pub_image_foo = n.advertise<sensor_msgs::Image>("foo", 1000);
+
+		auto pub_image_bar = n.advertise<sensor_msgs::Image>("bar", 1000);
 
 		for (auto i = 0; i >= 0; ++i) {
 
-			auto msg_point_cloud = create_image(img_path);
-			pub_point_cloud.publish(msg_point_cloud);
+			auto msg_image = create_image(img_path);
 
-			std::this_thread::sleep_for(std::chrono::duration<double>(1.0));
+			pub_image_foo.publish(msg_image);
+			printf("pub foo\n");
+			std::this_thread::sleep_for(std::chrono::duration<double>(.5));
+
+			pub_image_bar.publish(msg_image);
+			printf("pub bar\n");
+			std::this_thread::sleep_for(std::chrono::duration<double>(.5));
 		}
 
 		cmg::spin();

@@ -50,12 +50,14 @@ namespace cmg {
 				return false;
 			}
 
-			auto sendLen = this->socket_->send(this->topic_, ss);
+			try {
 
-			if (length != sendLen) {
+				auto send_len = this->socket_->send(this->topic_, ss);
+				printf("SocketSender send msg_cipher_len %zu\n", send_len);
 
-				printf("stream len(%lu) != send len(%lu)\n", ss.str().length(), sendLen);
-				return false;
+			} catch (const std::runtime_error &e) {
+
+				printf("SocketSender send error: %s\n", e.what());
 			}
 
 			return true;

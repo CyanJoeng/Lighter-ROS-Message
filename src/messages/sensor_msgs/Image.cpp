@@ -3,13 +3,27 @@
  * Date: Wed Dec  8 16:14:11 CST 2021
  */
 #include "Image.hpp"
-#include "protos/sensor_msgs.pb.h"
 #include <algorithm>
 #include <cstring>
+#include <sstream>
+
+#include "protos/sensor_msgs.pb.h"
+#include "messages/codex.hpp"
 
 namespace cmg { namespace sensor_msgs{
 
+	using namespace google::protobuf;
+
 	auto Image::serialize(std::ostream &out) -> unsigned long {
+
+#if 0
+		out.write((char*)&this->rows, sizeof(this->rows));
+		out.write((char*)&this->cols, sizeof(this->cols));
+		out.write((char*)&this->channels, sizeof(this->channels));
+		out.write((char*)this->data.data(), this->data.size());
+
+		return out.tellp();
+#endif
 
 		cmg_pb::Image msg;
 
@@ -23,18 +37,41 @@ namespace cmg { namespace sensor_msgs{
 		auto len = this->rows * this->cols * this->channels;
 		msg.set_data(this->data.data(), len);
 
-		if (msg.SerializePartialToOstream(&out))
-			return msg.ByteSizeLong();
-		else
+		std::string msg_data;
+		
+		if (!msg.SerializeToString(&msg_data)) {
+
 			printf("Image serialize failed\n");
-		return 0;
+			return 0;
+		}
+
+		//msg_data = Codex::encode64(msg_data);
+		out.write(msg_data.data(), msg_data.length());
+
+		return msg_data.length();
 	}
 
 	auto Image::parse(std::istream &in) -> unsigned long {
 
-		cmg_pb::Image msg;
+#if 0
+		in.read((char*)&this->rows, sizeof(this->rows));
+		in.read((char*)&this->cols, sizeof(this->cols));
+		in.read((char*)&this->channels, sizeof(this->channels));
 
-		if (!msg.ParseFromIstream(&in)) {
+		this->data.resize(this->rows * this->cols * this->channels);
+		in.read((char*)this->data.data(), this->data.size());
+
+		return in.tellg();
+#endif
+
+		cmg_pb::Image msg;
+		
+		std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
+
+		std::string msg_data = ss.str();
+		//msg_data = Codex::decode64(msg_data);
+
+		if (!msg.ParseFromString(msg_data)) {
 
 			printf("Image parse failed\n");
 			return 0;
@@ -50,7 +87,7 @@ namespace cmg { namespace sensor_msgs{
 		this->data.resize(this->rows * this->cols * this->channels);
 		memcpy(this->data.data(), data, this->data.size());
 
-		return msg.ByteSizeLong();
+		return msg_data.length();
 	}
 
 	auto Image::setData(int rows, int cols, int channels, char *data) -> int {

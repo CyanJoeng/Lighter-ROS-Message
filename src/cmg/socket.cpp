@@ -67,8 +67,8 @@ namespace cmg {
 
 		auto subs = (uint32_t) nn_get_statistic (this->sid_, NN_STAT_CURRENT_CONNECTIONS);
 		printf("Socket %s clients %d\n", this->url_.c_str(), subs);
-		
-		auto str = topic + '|' + ss.str();
+
+		auto str = topic + '\n' + ss.str();
 		auto ret = nn_send(this->sid_, str.c_str(), str.length(), 0);
 		if (ret < 0) {
 
@@ -114,14 +114,27 @@ namespace cmg {
 
 		this->msg_callback_ = callback;
 
-		auto ret = nn_setsockopt(this->sid_, NN_SUB, NN_SUB_SUBSCRIBE, topic.c_str(), 0);
-		if (ret < 0) {
+		{
+			auto ret = nn_setsockopt(this->sid_, NN_SUB, NN_SUB_SUBSCRIBE, topic.c_str(), topic.length());
+			if (ret < 0) {
 
-			auto error_str = nn_strerror(nn_errno());
-			fprintf(stderr, "socket set topic failed (%s)\n", error_str);
-			throw std::runtime_error(error_str);
+				auto error_str = nn_strerror(nn_errno());
+				fprintf(stderr, "socket set topic failed (%s)\n", error_str);
+				throw std::runtime_error(error_str);
+			}
+			printf("Socket client set topic: %s\n", topic.data());
 		}
-		printf("Socket client set topic: %s\n", topic.data());
+		{
+			int recv_max_size = -1;
+			auto ret = nn_setsockopt(this->sid_, NN_SOL_SOCKET, NN_RCVMAXSIZE, &recv_max_size, sizeof(int));
+			if (ret < 0) {
+
+				auto error_str = nn_strerror(nn_errno());
+				fprintf(stderr, "socket set recv max size failed (%s)\n", error_str);
+				throw std::runtime_error(error_str);
+			}
+			printf("Socket client set recv max size: %d\n", recv_max_size);
+		}
 
 		auto receive_job = [this, topic]() {
 
@@ -132,7 +145,9 @@ namespace cmg {
 				void *buf = nullptr;
 				auto len = nn_recv(this->sid_, &buf, NN_MSG, 0);
 				
-				printf("Receiver receive len %d\n", len);
+				auto recv_topic = std::string((char*)buf);
+				recv_topic = recv_topic.substr(0, recv_topic.find('\n'));
+				printf("Receiver receive len %d topic %s\n", len, recv_topic.c_str());
 				if (len < 0) {
 
 					auto error_str = nn_strerror(nn_errno());
@@ -154,7 +169,7 @@ namespace cmg {
 				}
 
 				std::stringstream ss;
-				ss.write(static_cast<const char *>(msg), len);
+				ss.write(msg, len);
 				this->msg_callback_(ss);
 
 				nn_freemsg(buf);

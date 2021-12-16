@@ -12,7 +12,7 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 find_package(nanomsg REQUIRED)
-# find_package(Boost REQUIRED)
+find_package(Boost REQUIRED)
 #find_package(OpenCV 4 REQUIRED)
 
 include_directories(
@@ -33,6 +33,7 @@ set(CMG_SRCS
 add_subdirectory(protos)
 
 set(MSG_SRCS
+	messages/codex.cpp
 	messages/foo_bar.cpp
 	messages/std_msgs/Header.hpp
 	messages/geometry_msgs/point32.hpp
