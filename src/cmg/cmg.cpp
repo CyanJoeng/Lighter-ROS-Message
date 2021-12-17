@@ -6,6 +6,8 @@
 
 #include <fstream>
 #include <mutex>
+#include <sstream>
+#include <stdexcept>
 #include <vector>
 
 #include "cmg/socket.hpp"
@@ -17,8 +19,9 @@ bool init_prococess_port(const std::string& cfg_file_path) {
 
 	if (!in.is_open()) {
 
-		printf("cfg file can not open: %s\n", cfg_file_path.c_str());
-		return false;
+		std::stringstream ss;
+		ss << "cfg file can not open: " << cfg_file_path;
+		throw std::runtime_error(ss.str());
 	}
 
 	std::string proc_name;
