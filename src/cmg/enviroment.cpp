@@ -20,18 +20,11 @@ namespace cmg {
 
 
 	Environment::Environment(const std::string &proc_name)
-		: proc_name_(proc_name) {}
+		: url_(URL::Inst(proc_name)) {}
 
-	Environment::~Environment() {
-
-	}
+	Environment::~Environment() {}
 
 	auto Environment::Inst(const std::string &proc_name) -> Environment& {
-
-		for (auto [str, env] : insts)
-			printf("Environment Inst insts %s, %d\n", str.data(), env.port_);
-
-		printf("Environment Inst proc name %s\n", proc_name.data());
 
 		if (proc_name == Environment::MULTI_PROC_NAME) {
 
@@ -42,19 +35,11 @@ namespace cmg {
 
 		if (insts.end() == insts.find(proc_name)) {
 
-			{
-				std::lock_guard<std::mutex> lck(env_mt);
+			std::lock_guard<std::mutex> lck(env_mt);
 
-				auto inst = Environment(proc_name);
-				inst.proc_name_ = proc_name;
-				insts.emplace(proc_name, inst);
-				env_cv.notify_all();
-			}
+			insts.emplace(proc_name, Environment(proc_name));
 
-			auto proc_port = Environment::PortFromKey(proc_name);
-			printf("Environment Inst proc_name to proc_port %s -> %d\n", proc_name.data(), proc_port);
-
-			insts.at(proc_name).port_ = proc_port;
+			env_cv.notify_all();
 		}
 
 		return insts.at(proc_name);
@@ -69,18 +54,5 @@ namespace cmg {
 
 				return Environment::insts.empty();
 			});
-	}
-
-	auto Environment::PortFromKey(const std::string &key) -> unsigned {
-
-		auto it = URL::proc_ports.find(key);
-		if (it == URL::proc_ports.end()) {
-
-			throw std::out_of_range("proc name not registed\n");
-		}
-
-		printf("Environment PortFromKey: use key (%s) -> port (%d)\n", key.data(), it->second);
-
-		return it->second;
 	}
 }

@@ -7,24 +7,30 @@ endif()
 if(NOT DEFINED Boost_DIR)
 	set(Boost_DIR $ENV{PREFIX}/lib/cmake/Boost-1.77.0)
 endif()
-#set(OpenCV_DIR $ENV{HOME}/.OpenCV/sdk/native/jni)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 find_package(nanomsg REQUIRED)
-find_package(Boost REQUIRED)
-#find_package(OpenCV 4 REQUIRED)
+list(APPEND EXT_LIBS nanomsg)
+
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
+	find_package(Boost REQUIRED)
+	include_directories(${Boost_INCLUDE_DIRS})
+
+	list(APPEND MSG_SRCS messages/codex.cpp)
+	list(APPEND EXT_LIBS ${Boost_LIBRARIES})
+endif()
 
 include_directories(
 	${nanomsg_INCDIR}
-	${Boost_INCLUDE_DIRS}
 	${OpenCV_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
 	)
 
-set(CMG_SRCS
+list(APPEND CMG_SRCS
 	cmg/cmg.cpp
+	cmg/url.cpp
 	cmg/socket.cpp
 	cmg/enviroment.cpp
 	cmg/node_handle.cpp
@@ -32,8 +38,7 @@ set(CMG_SRCS
 
 add_subdirectory(protos)
 
-set(MSG_SRCS
-	messages/codex.cpp
+list(APPEND MSG_SRCS
 	messages/foo_bar.cpp
 	messages/std_msgs/Header.hpp
 	messages/geometry_msgs/point32.hpp
@@ -46,9 +51,7 @@ add_library(${PROJECT_NAME} SHARED
 	${MSG_SRCS}
 	)
 target_link_libraries(${PROJECT_NAME} 
-	nanomsg
-	${Boost_LIBRARIES}
-	#${OpenCV_LIBS}
+	${EXT_LIBS}
 
 	proto_msg
 	)

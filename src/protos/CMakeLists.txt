@@ -13,7 +13,7 @@ add_library(${PROJECT_NAME} SHARED
 	${PROTO_SRCS}
 	)
 
-if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Android")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 	target_link_libraries(${PROJECT_NAME}
 		${Protobuf_LIBRARIES} log
 		)

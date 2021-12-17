@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
 		std::string img_path = argv[2];
 
-		cmg::init(argc, argv, server_proc_name.c_str());
+		cmg::init(argc - 2, argv + 2, server_proc_name.c_str());
 
 		cmg::NodeHandle n("~");
 
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
 		if (argc > 3)
 			topic = argv[3];
 
-		cmg::init(argc, argv, client_proc_name.c_str());
+		cmg::init(argc - 3, argv + 3, client_proc_name.c_str());
 
 		cmg::NodeHandle n("~");
 

@@ -8,18 +8,9 @@
 #include <map>
 #include <functional>
 
+#include "url.hpp"
+
 namespace cmg {
-
-	struct URL {
-
-		static constexpr unsigned BASE_PORT = 9527;
-
-		static std::map<std::string, unsigned> proc_ports;
-
-		static constexpr auto LOCAL_SOCKET = "tcp://0.0.0.0";
-
-		static auto Build(const std::string &address, unsigned port) -> const std::string;
-	};
 
 	class Socket {
 
@@ -31,26 +22,27 @@ namespace cmg {
 	private:
 		int sid_;
 
-		std::string url_;
+		const URL& url_;
 
 		SsCallback msg_callback_;
 
 		std::thread reveiver_th_;
-		bool exit_receive_{false};
+
+		bool exit_receive_ {false};
 
 	private:
-		Socket(int protocol, unsigned port, const std::string &address, unsigned wait = 0);
+		Socket(int protocol, const URL &url, unsigned wait = 0);
 
 	public:
 		~Socket();
 
 		// Server port
-		static auto Server(unsigned port, const std::string &address = URL::LOCAL_SOCKET) -> std::shared_ptr<Socket>;
+		static auto Server(const URL &url) -> std::shared_ptr<Socket>;
 
 		auto send(const std::string &topic, const std::stringstream &str) -> unsigned long;
 
 		// client port
-		static auto Client(unsigned port, const std::string &address = URL::LOCAL_SOCKET, unsigned wait = 0) -> std::shared_ptr<Socket>;
+		static auto Client(const URL &url, unsigned wait = 0) -> std::shared_ptr<Socket>;
 
 		auto stopReceive() -> bool;
 

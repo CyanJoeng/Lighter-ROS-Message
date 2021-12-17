@@ -12,4 +12,7 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}/src/message
 	${CMAKE_CURRENT_BINARY_DIR}/src
 	)
-add_subdirectory(test)
+
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
+	add_subdirectory(test)
+endif()

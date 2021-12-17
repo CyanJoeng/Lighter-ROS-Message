@@ -7,9 +7,6 @@
 #include <arpa/inet.h>
 
 #include <cstdio>
-#include <map>
-#include <list>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -20,17 +17,8 @@
 
 namespace cmg {
 
-	std::map<std::string, unsigned> URL::proc_ports = {
-		{"server", BASE_PORT + 1},
-		{"client", BASE_PORT + 2}
-	};
-
-	auto URL::Build(const std::string &address, unsigned port) -> const std::string {
-
-		return address + ":" + std::to_string(port);
-	}
-
-	Socket::Socket(int protocol, unsigned port, const std::string &address, unsigned wait) {
+	Socket::Socket(int protocol, const URL &url, unsigned wait)
+		: url_(url) {
 
 		this->sid_ = nn_socket(AF_SP, protocol);
 		if (this->sid_ < 0) {
@@ -39,8 +27,6 @@ namespace cmg {
 			fprintf(stderr, "socket open failed: (%s)\n", error_str);
 			throw std::runtime_error(error_str);
 		}
-
-		this->url_ = URL::Build(address, port);
 	};
 
 	Socket::~Socket() {
@@ -48,17 +34,17 @@ namespace cmg {
 		this->stopReceive();
 	}
 
-	auto Socket::Server(unsigned port, const std::string &address) -> std::shared_ptr<Socket> {
+	auto Socket::Server(const URL &url) -> std::shared_ptr<Socket> {
 
-		auto socket = std::shared_ptr<Socket>(new Socket(NN_PUB, port, address));
-		auto ret = nn_bind(socket->sid_, socket->url_.c_str());
+		auto socket = std::shared_ptr<Socket>(new Socket(NN_PUB, url));
+		auto ret = nn_bind(socket->sid_, socket->url_().c_str());
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
-			fprintf(stderr, "socket bind failed: (bind to %s %s)\n", socket->url_.c_str(), error_str);
+			fprintf(stderr, "socket bind failed: (bind to %s %s)\n", socket->url_().c_str(), error_str);
 			throw std::runtime_error(error_str);
 		}
-		printf("Socket bind: %s\n", socket->url_.data());
+		printf("Socket bind: %s\n", socket->url_().data());
 
 		return socket;
 	}
@@ -66,7 +52,7 @@ namespace cmg {
 	auto Socket::send(const std::string &topic, const std::stringstream &ss) -> unsigned long {
 
 		auto subs = (uint32_t) nn_get_statistic (this->sid_, NN_STAT_CURRENT_CONNECTIONS);
-		printf("Socket %s clients %d\n", this->url_.c_str(), subs);
+		printf("Socket %s clients %d\n", this->url_().c_str(), subs);
 
 		auto str = topic + '\n' + ss.str();
 		auto ret = nn_send(this->sid_, str.c_str(), str.length(), 0);
@@ -82,18 +68,18 @@ namespace cmg {
 		return ret - topic.length() - 1;
 	}
 
-	auto Socket::Client(unsigned port, const std::string &address, unsigned wait) -> std::shared_ptr<Socket> {
+	auto Socket::Client(const URL &url, unsigned wait) -> std::shared_ptr<Socket> {
 
-		auto socket = std::shared_ptr<Socket>(new Socket(NN_SUB, port, address, wait));
+		auto socket = std::shared_ptr<Socket>(new Socket(NN_SUB, url, wait));
 
-		auto ret = nn_connect(socket->sid_, socket->url_.c_str());
+		auto ret = nn_connect(socket->sid_, socket->url_().c_str());
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
 			fprintf(stderr, "socket connect failed (%s)\n", error_str);
 			throw std::runtime_error(error_str);
 		}
-		printf("Socket connect: %s\n", socket->url_.c_str());
+		printf("Socket connect: %s\n", socket->url_().c_str());
 
 		return socket;
 	}

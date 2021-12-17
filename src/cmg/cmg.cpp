@@ -5,6 +5,8 @@
 #include "cmg.hpp"
 
 #include <fstream>
+#include <mutex>
+#include <vector>
 
 #include "cmg/socket.hpp"
 
@@ -20,21 +22,42 @@ bool init_prococess_port(const std::string& cfg_file_path) {
 	}
 
 	std::string proc_name;
-	while (true) {
+	std::string ip;
 
-		in >> proc_name;
-		if (!proc_name.empty())
+	while (!in.eof()) {
+
+		in >> proc_name >> ip;
+		printf("[CMG][config] proc %s\t ip %s\n", proc_name.c_str(), ip.c_str());
+		if (proc_name.empty())
 			break;
 		
-		auto offset = cmg::URL::proc_ports.size();
-		cmg::URL::proc_ports[proc_name] = cmg::URL::BASE_PORT + offset;
+		cmg::URL::RegistProc(proc_name, ip);
 	}
 
 	return true;
 }
 
+static bool inited = false;
+static std::mutex init_mt;
 
 int cmg::init(int argc, char **argv, const char *proc_name) {
+
+	std::vector<std::string> args;
+	for (auto i = 0; i < argc; ++i)
+		args.emplace_back(argv[i]);
+
+	return cmg::init_str(args, proc_name);
+}
+
+int cmg::init_str(const std::vector<std::string> &args, const char *proc_name) {
+
+	{
+		std::lock_guard<std::mutex> lck(init_mt);
+		if (inited) return -1;
+
+		init_prococess_port(args[1]);
+		inited = true;
+	}
 
 	Environment::Inst(proc_name);
 
