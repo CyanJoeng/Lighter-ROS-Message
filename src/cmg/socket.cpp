@@ -37,7 +37,7 @@ namespace cmg {
 	auto Socket::Server(const URL &url) -> std::shared_ptr<Socket> {
 
 		auto socket = std::shared_ptr<Socket>(new Socket(NN_PUB, url));
-		auto ret = nn_bind(socket->sid_, socket->url_().c_str());
+		auto ret = nn_bind(socket->sid_, socket->url_.bindUrl().c_str());
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());

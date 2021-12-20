@@ -59,4 +59,9 @@ namespace cmg {
 	auto URL::operator() () const -> const std::string& {
 		return this->tcp_url_;
 	}
+
+	auto URL::bindUrl() const -> const std::string {
+
+		return URL::BuildUrl(URL::LOCAL_IP, this->net_port_);
+	}
 }

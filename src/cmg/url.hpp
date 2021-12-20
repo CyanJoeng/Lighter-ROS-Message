@@ -41,6 +41,8 @@ namespace cmg {
 
 		auto operator() () const -> const std::string&;
 
+		auto bindUrl() const -> const std::string;
+
 	private:
 		std::string proc_name_;
 
