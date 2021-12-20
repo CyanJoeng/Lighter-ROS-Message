@@ -5,19 +5,24 @@
 #include "foo_bar.hpp"
 #include <cstdio>
 
+
+#include "protos/foo_bar.pb.h"
+
 namespace cmg { namespace example_msgs {
 
-	FooBarMessage::FooBarMessage(int id, const std::string &extra) {
-
-		this->msg.set_id(id);
-		this->msg.set_extra(extra);
-	}
+	FooBarMessage::FooBarMessage(int id, const std::string &extra)
+		: id(id), extra(extra) {}
 
 	auto FooBarMessage::serialize(std::ostream &out) -> unsigned long {
 
-		auto ret = this->msg.SerializeToOstream(&out);
+		example::FooBar msg;
+
+		msg.set_id(this->id);
+		msg.set_extra(this->extra);
+
+		auto ret = msg.SerializeToOstream(&out);
 		if (ret)
-			return this->msg.ByteSizeLong();
+			return msg.ByteSizeLong();
 		else {
 
 			printf("FooBar serialize failed\n");
@@ -27,10 +32,17 @@ namespace cmg { namespace example_msgs {
 
 	auto FooBarMessage::parse(std::istream &in) -> unsigned long {
 
-		if (this->msg.ParsePartialFromIstream(&in))
-			return this->msg.ByteSizeLong();
-		else
+		example::FooBar msg;
+
+		if (!msg.ParsePartialFromIstream(&in)) {
+
 			printf("FooBar parse failed\n");
-		return 0;
+			return 0;
+		}
+
+		this->id = msg.id();
+		this->extra = msg.extra();
+
+		return msg.ByteSizeLong();
 	}
 }}

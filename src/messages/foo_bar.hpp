@@ -4,15 +4,16 @@
  */
 #pragma  once
 #include "message.hpp"
+#include <string>
 
-#include "protos/foo_bar.pb.h"
 
 namespace cmg { namespace example_msgs {
 
 	class FooBarMessage : public cmg::Message {
 
 	public:
-		example::FooBar msg;
+		int id {0};
+		std::string extra {""};
 
 	public:
 		FooBarMessage(int id = 0, const std::string &extra = "");

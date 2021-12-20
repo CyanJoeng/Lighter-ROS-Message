@@ -11,12 +11,12 @@ using namespace cmg;
 
 void cb0(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
 
-	printf("client 0: %d,%s\n", msg->msg.id(), msg->msg.extra().data());
+	printf("client 0: %d,%s\n", msg->id, msg->extra.data());
 
 }
 
 void cb1(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
-	printf("client 1: %d,%s\n", msg->msg.id(), msg->msg.extra().data());
+	printf("client 1: %d,%s\n", msg->id, msg->extra.data());
 }
 
 
@@ -75,8 +75,6 @@ int main(int argc, char *argv[]) {
 		}
 
 	}
-
-	google::protobuf::ShutdownProtobufLibrary();
 
 	return 0;
 }
