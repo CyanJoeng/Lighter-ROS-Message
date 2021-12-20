@@ -79,7 +79,7 @@ namespace cmg {
 			fprintf(stderr, "socket connect failed (%s)\n", error_str);
 			throw std::runtime_error(error_str);
 		}
-		printf("Socket connect: %s\n", socket->url_().c_str());
+		printf("Socket connect: %s %d\n", socket->url_().c_str(), ret);
 
 		return socket;
 	}

@@ -13,15 +13,23 @@
 #include "cmg/socket.hpp"
 
 
-bool init_prococess_port(const std::string& cfg_file_path) {
+bool init_process_port(const std::string& cfg_file_path) {
 
 	std::ifstream in(cfg_file_path);
 
 	if (!in.is_open()) {
 
-		std::stringstream ss;
-		ss << "cfg file can not open: " << cfg_file_path;
-		throw std::runtime_error(ss.str());
+		std::list<std::pair<std::string, std::string>> cfg = {
+
+				{"station", "172.18.135.103"},
+				{"client", "0.0.0.0"}
+		};
+
+		for (auto [proc_name, ip] : cfg)
+			cmg::URL::RegistProc(proc_name, ip);
+
+
+		return true;
 	}
 
 	std::string proc_name;
@@ -46,7 +54,8 @@ static std::mutex init_mt;
 int cmg::init(int argc, char **argv, const char *proc_name) {
 
 	std::vector<std::string> args;
-	for (auto i = 0; i < argc; ++i)
+	args.reserve(argc);
+for (auto i = 0; i < argc; ++i)
 		args.emplace_back(argv[i]);
 
 	return cmg::init_str(args, proc_name);
@@ -58,7 +67,7 @@ int cmg::init_str(const std::vector<std::string> &args, const char *proc_name) {
 		std::lock_guard<std::mutex> lck(init_mt);
 		if (inited) return -1;
 
-		init_prococess_port(args[1]);
+		init_process_port(args[1]);
 		inited = true;
 	}
 

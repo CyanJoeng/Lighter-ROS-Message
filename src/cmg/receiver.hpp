@@ -3,6 +3,7 @@
  * Date: Fri Dec  3 14:33:11 CST 2021
  */
 #pragma once
+#include <cstdio>
 #include <functional>
 #include <memory>
 #include <sstream>
