@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "protos/example.pb.h"
+#include "messages/codex.hpp"
 
 namespace cmg { namespace example_msgs {
 
@@ -28,6 +29,7 @@ namespace cmg { namespace example_msgs {
 			return 0;
 		}
 
+		msg_data = Codex::encode64(msg_data);
 		out.write(msg_data.data(), msg_data.length());
 		return msg_data.length();
 	}
@@ -39,6 +41,7 @@ namespace cmg { namespace example_msgs {
 		std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
 
 		std::string msg_data = ss.str();
+		msg_data = Codex::decode64(msg_data);
 
 		if (!msg.ParsePartialFromString(msg_data)) {
 
