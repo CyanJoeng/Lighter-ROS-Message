@@ -19,30 +19,29 @@ bool init_process_port(const std::string& cfg_file_path) {
 
 	if (!in.is_open()) {
 
-		std::list<std::pair<std::string, std::string>> cfg = {
+		std::list<std::tuple<std::string, std::string, std::string>> cfg = {
 
-				{"station", "172.18.135.103"},
-				{"client", "0.0.0.0"}
+				{"-", "station", "172.18.135.103"},
+				{"-", "client", "0.0.0.0"}
 		};
 
-		for (auto [proc_name, ip] : cfg)
+		for (auto [tag, proc_name, ip] : cfg)
 			cmg::URL::RegistProc(proc_name, ip);
 
 
 		return true;
 	}
 
+	std::string tag;
 	std::string proc_name;
 	std::string ip;
 
 	while (!in.eof()) {
 
-		in >> proc_name >> ip;
+		in >> tag >> proc_name >> ip;
 		printf("[CMG][config] proc %s\t ip %s\n", proc_name.c_str(), ip.c_str());
-		if (proc_name.empty())
-			break;
-		
-		cmg::URL::RegistProc(proc_name, ip);
+		if (tag == "-")
+			cmg::URL::RegistProc(proc_name, ip);
 	}
 
 	return true;

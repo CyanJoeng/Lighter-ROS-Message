@@ -1,8 +1,17 @@
 find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
+find_package(Boost REQUIRED
+	program_options
+	)
+
+include_directories(
+	${OpenCV_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
+	)
+
+message("boost libs ${Boost_LIBRARIES}")
 
 add_executable(pubsub_demo pubsub_demo.cpp)
-target_link_libraries(pubsub_demo cmg)
+target_link_libraries(pubsub_demo cmg ${Boost_LIBRARIES})
 
 add_executable(pubsub_point_cloud pubsub_point_cloud.cpp)
 target_link_libraries(pubsub_point_cloud cmg)

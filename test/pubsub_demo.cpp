@@ -2,12 +2,17 @@
  * Author: CYan
  * Date: Thu Dec  2 16:18:22 CST 2021
  */
+#include <thread>
+
+#include <boost/program_options.hpp>
+
 #include "cmg/cmg.hpp"
 #include "messages/foo_bar.hpp"
 #include "messages/message.hpp"
-#include <thread>
 
 using namespace cmg;
+
+namespace po = boost::program_options;
 
 void cb0(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
 
@@ -20,16 +25,60 @@ void cb1(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
 }
 
 
+auto args_parser(int argc, char *argv[]) -> po::variables_map {
+
+	po::options_description desc("Socket connection test demo");
+	desc.add_options()
+		("help", "print this message")
+		("mode", po::value<char>(), "socker mode")
+		("proc", po::value<std::string>()->default_value("server"), "server proc name")
+		("topic", po::value<std::string>()->default_value("foo"), "topic name")
+		("cfg", po::value<std::string>()->default_value(""), "config file");
+
+	po::positional_options_description pos_desc;
+	pos_desc.add("mode", 1);
+		
+	po::command_line_parser parser = po::command_line_parser(argc, argv).options(desc).positional(pos_desc);
+
+	po::variables_map vm;
+	po::store(parser.run(), vm);
+	po::notify(vm);
+
+	if (vm.count("help") || !vm.count("mode")) {
+
+		std::cout << "Usage: " << argv[0] << " ";
+		for (auto i = 0; i < pos_desc.max_total_count(); ++i)
+			std::cout << pos_desc.name_for_position(i) << " ";
+		std::cout << "[options]" << std::endl;
+		
+		std::cout << desc << std::endl;
+		exit(0);
+	}
+
+	return vm;
+}
+
+
 int main(int argc, char *argv[]) {
 
 	const auto server_proc_name = "server";
 	const auto client_proc_name = "client";
 
-	std::string mode = argv[1];
+	auto args = args_parser(argc, argv);
 
-	if (mode == "s") {
+	char mode = args["mode"].as<char>();
+	std::string proc = args["proc"].as<std::string>();
+	std::string topic = args["topic"].as<std::string>();
+	std::string cfg = args["cfg"].as<std::string>();
 
-		cmg::init(argc, argv, server_proc_name);
+	char *proc_args[] = {
+		argv[0],
+		cfg.data()
+	};
+
+	if (mode == 's') {
+
+		cmg::init(2, proc_args, server_proc_name);
 
 		cmg::NodeHandle n("~");
 
@@ -51,29 +100,17 @@ int main(int argc, char *argv[]) {
 
 		cmg::spin();
 
-	} else if (mode == "c") {
+	} else if (mode == 'c') {
 
-		std::string id = argv[2];
-
-		cmg::init(argc, argv, client_proc_name);
+		cmg::init(2, proc_args, client_proc_name);
 
 		cmg::NodeHandle n("~");
 
-		std::string proc_topic;
-		if (id == "0") {
+		std::stringstream ss;
+		ss << "/" << proc << "/" << topic;
 
-			proc_topic = "/server/foo";
-
-			auto sub = n.subscribe(proc_topic, 1000, cb0);
-			cmg::spin();
-
-		} else if (id == "1") {
-
-			proc_topic = "/server/bar";
-			auto sub = n.subscribe(proc_topic, 1000, cb1);
-			cmg::spin();
-		}
-
+		auto sub = n.subscribe(ss.str(), 1000, cb0);
+		cmg::spin();
 	}
 
 	return 0;

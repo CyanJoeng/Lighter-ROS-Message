@@ -5,6 +5,8 @@
 #include "foo_bar.hpp"
 #include <cstdio>
 
+#include <sstream>
+
 
 #include "protos/foo_bar.pb.h"
 
@@ -20,21 +22,26 @@ namespace cmg { namespace example_msgs {
 		msg.set_id(this->id);
 		msg.set_extra(this->extra);
 
-		auto ret = msg.SerializeToOstream(&out);
-		if (ret)
-			return msg.ByteSizeLong();
-		else {
+		std::string msg_data;
+		if (!msg.SerializeToString(&msg_data)) {
 
 			printf("FooBar serialize failed\n");
+			return 0;
 		}
-		return 0;
+
+		out.write(msg_data.data(), msg_data.length());
+		return msg_data.length();
 	}
 
 	auto FooBarMessage::parse(std::istream &in) -> unsigned long {
 
 		example::FooBar msg;
 
-		if (!msg.ParsePartialFromIstream(&in)) {
+		std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
+
+		std::string msg_data = ss.str();
+
+		if (!msg.ParsePartialFromString(msg_data)) {
 
 			printf("FooBar parse failed\n");
 			return 0;
