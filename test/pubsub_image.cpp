@@ -6,23 +6,22 @@
 #include <mutex>
 #include <thread>
 
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+#include <boost/program_options.hpp>
+
+#include <opencv2/opencv.hpp>
 
 #include "cmg/cmg.hpp"
 #include "messages/sensor_msgs/Image.hpp"
 
 using namespace cmg;
+namespace po = boost::program_options;
 
-bool save_img = true;
 
 auto create_image(const std::string &img_path) -> sensor_msgs::ImagePtr {
 
 	sensor_msgs::ImagePtr image(new sensor_msgs::Image);
 
-	image->header;  // img_msg->header;
+	//image->header;  // img_msg->header;
 	image->header.frame_id = "world";
 	image->header.stamp.time_ = (rand() % 1000 * 1e-3);
 
@@ -64,6 +63,8 @@ void ui_refresh() {
 	}
 }
 
+static bool save_img = false;
+
 auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
 
 	printf("cb image size (%d, %d) stamp %f\n", image->rows, image->cols, image->header.stamp.toSec());
@@ -82,23 +83,70 @@ auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
 	}
 }
 
+auto args_parser(int argc, char *argv[]) -> po::variables_map {
+
+	po::options_description desc("Socket connection test demo");
+	desc.add_options()
+		("help", "print this message")
+		("mode", po::value<char>()->required(), "socker mode")
+		("proc", po::value<std::string>()->default_value("server"), "server proc name")
+		("topic", po::value<std::string>()->default_value("foo"), "topic name")
+		("cfg", po::value<std::string>()->default_value(""), "config file")
+		("save_img", po::value<bool>(), "image be published")
+		("image", po::value<std::string>(), "store received image");
+
+	po::positional_options_description pos_desc;
+	pos_desc.add("mode", 1);
+		
+	po::command_line_parser parser = po::command_line_parser(argc, argv).options(desc).positional(pos_desc);
+
+	po::variables_map vm;
+	po::store(parser.run(), vm);
+	po::notify(vm);
+
+	if (vm.count("help") || !vm.count("mode")) {
+
+		std::cout << "Usage: " << argv[0] << " ";
+		for (auto i = 0; i < pos_desc.max_total_count(); ++i)
+			std::cout << pos_desc.name_for_position(i) << " ";
+		std::cout << "[options]" << std::endl;
+		
+		std::cout << desc << std::endl;
+		exit(0);
+	}
+
+	if (vm.count("save_img"))
+		save_img = true;
+
+	return vm;
+}
+
 int main(int argc, char *argv[]) {
 
 	std::string server_proc_name = "server";
 	std::string client_proc_name = "client";
 
-	std::string mode = argv[1];
+	auto args = args_parser(argc, argv);
 
-	if (mode == "s") {
+	char mode = args["mode"].as<char>();
+	std::string proc = args["proc"].as<std::string>();
+	std::string topic = args["topic"].as<std::string>();
+	std::string cfg = args["cfg"].as<std::string>();
 
-		std::string img_path = argv[2];
+	const char *proc_args[] = {
+		argv[0],
+		cfg.data()
+	};
 
-		cmg::init(argc - 2, argv + 2, server_proc_name.c_str());
+	if (mode == 's') {
+
+		std::string img_path = args["image"].as<std::string>();
+
+		cmg::init(2, proc_args, server_proc_name.c_str());
 
 		cmg::NodeHandle n("~");
 
 		auto pub_image_foo = n.advertise<sensor_msgs::Image>("foo", 1000);
-
 		auto pub_image_bar = n.advertise<sensor_msgs::Image>("bar", 1000);
 
 		for (auto i = 0; i >= 0; ++i) {
@@ -116,20 +164,15 @@ int main(int argc, char *argv[]) {
 
 		cmg::spin();
 
-	} else if (mode == "c") {
+	} else if (mode == 'c') {
 
 		std::string topic = "foo";
 
-		if (argc > 2)
-			server_proc_name = argv[2];
-		if (argc > 3)
-			topic = argv[3];
-
-		cmg::init(argc - 3, argv + 3, client_proc_name.c_str());
+		cmg::init(2, proc_args, client_proc_name.c_str());
 
 		cmg::NodeHandle n("~");
 
-		std::string proc_topic = "/" + server_proc_name + "/" + topic;
+		std::string proc_topic = "/" + proc + "/" + topic;
 
 		work_loop = std::thread {
 			[&]() {

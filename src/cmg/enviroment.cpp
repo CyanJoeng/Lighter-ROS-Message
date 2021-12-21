@@ -16,11 +16,11 @@ namespace cmg {
 	static std::mutex env_mt;
 	static std::condition_variable env_cv;
 
-	std::map<std::string, Environment> Environment::insts;
+	std::map<Environment::ProcType, Environment> Environment::insts;
 
 
 	Environment::Environment(const std::string &proc_name)
-		: url_(URL::Inst(proc_name)) {}
+		: proc_name_(proc_name) {}
 
 	Environment::~Environment() {}
 

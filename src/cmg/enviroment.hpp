@@ -25,13 +25,17 @@ namespace cmg {
 	public:
 		static constexpr auto MULTI_PROC_NAME = "~";
 
+		using TopicType = std::string;
+
+		using ProcType = std::string;
+
 	public:
 		static auto Inst(const std::string &proc_name = "") -> Environment&;
 
 		static void Spin();
 
 	private:
-		static std::map<std::string, Environment> insts;
+		static std::map<ProcType, Environment> insts;
 
 	public:
 		~Environment();
@@ -40,22 +44,23 @@ namespace cmg {
 		Environment(const std::string &proc_name);
 
 	private:
-		const URL& url_;
+		const std::string proc_name_;
 
-		std::shared_ptr<Socket> server_;
+		std::map<TopicType, std::shared_ptr<Socket>> servers_;
 
-		std::map<std::string, std::shared_ptr<Socket>> clients_;
+		std::map<TopicType, std::shared_ptr<Socket>> clients_;
 
 	public:
 		template <typename Msg>
 		auto sender(const std::string &topic, unsigned wait) -> std::shared_ptr<Sender> {
 
-			if (!this->server_) {
+			if (this->servers_.end() == this->servers_.find(topic)) {
 
-				this->server_ = Socket::Server(this->url_);
+				auto server = Socket::Server(URL::Inst(this->proc_name_, topic));
+				this->servers_.emplace(topic, server);
 			}
 
-			auto sender = std::make_shared<SocketSender>(this->server_, topic, wait);
+			auto sender = std::make_shared<SocketSender>(this->servers_[topic], topic, wait);
 
 			return sender;
 		}
@@ -63,10 +68,13 @@ namespace cmg {
 		template <typename Msg>
 		auto receiver(const std::string &topic, unsigned wait, const Receiver::Callback<Msg> &callback) -> std::shared_ptr<Receiver> {
 
-			auto client = Socket::Client(this->url_);
-			this->clients_.emplace(topic, client);
+			if (this->clients_.end() == this->clients_.find(topic)) {
 
-			auto receiver = std::make_shared<SocketReceiver<Msg>>(client, topic, callback);
+				auto client = Socket::Client(URL::Inst(this->proc_name_, topic));
+				this->clients_.emplace(topic, client);
+			}
+
+			auto receiver = std::make_shared<SocketReceiver<Msg>>(this->clients_[topic], topic, callback);
 			return receiver;
 		}
 	};

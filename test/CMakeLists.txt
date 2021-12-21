@@ -8,8 +8,6 @@ include_directories(
 	${Boost_INCLUDE_DIRS}
 	)
 
-message("boost libs ${Boost_LIBRARIES}")
-
 add_executable(pubsub_demo pubsub_demo.cpp)
 target_link_libraries(pubsub_demo cmg ${Boost_LIBRARIES})
 
@@ -18,4 +16,4 @@ target_link_libraries(pubsub_point_cloud cmg)
 
 add_executable(pubsub_image pubsub_image.cpp)
 target_link_libraries(pubsub_image cmg
-	${OpenCV_LIBS})
+	${OpenCV_LIBS} ${Boost_LIBRARIES})

@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 		auto pub_foo = n.advertise<cmg::StrMessage>("foo", 1000);
 		auto pub_bar = n.advertise<cmg::StrMessage>("bar", 1000);
 
-		for (auto i = 0; i < 10;++i) {
+		for (auto i = 0; i < 1000;++i) {
 
 			auto msg_foo = std::make_shared<example_msgs::FooBarMessage>(i, (rand() % (int)1e6) * 1e-3, "foo");
 			pub_foo.publish(msg_foo);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 			auto msg_bar = std::make_shared<example_msgs::FooBarMessage>(i, (rand() % (int)1e6) * 1e-3, "bar");
 			pub_bar.publish(msg_bar);
 
-			std::this_thread::sleep_for(std::chrono::duration<double>(1.0));
+			std::this_thread::sleep_for(std::chrono::duration<double>(.5));
 		}
 
 		cmg::spin();

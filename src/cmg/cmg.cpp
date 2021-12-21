@@ -9,6 +9,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <tuple>
 
 #include "cmg/socket.hpp"
 
@@ -17,16 +18,27 @@ bool init_process_port(const std::string& cfg_file_path) {
 
 	std::ifstream in(cfg_file_path);
 
+	struct _IT {
+
+		std::string proc;
+		std::string ip;
+		std::vector<std::string> topics;
+	};
+
 	if (!in.is_open()) {
 
-		std::list<std::pair<std::string, std::string>> cfg = {
+		std::list<_IT> cfg = {
 
-				{"station", "172.18.135.103"},
-				{"client", "0.0.0.0"}
+			{"station", "172.18.135.103", {
+											  "match",
+											  "foo"
+										  }},
+			{"client", "0.0.0.0", {}}
 		};
 
-		for (auto [proc_name, ip] : cfg)
-			cmg::URL::RegistProc(proc_name, ip);
+		for (auto [proc_name, ip, topics] : cfg)
+			for (auto &topic : topics)
+				cmg::URL::RegistProc(proc_name, topic, ip);
 
 
 		return true;
@@ -35,13 +47,22 @@ bool init_process_port(const std::string& cfg_file_path) {
 	std::string tag;
 	std::string proc_name;
 	std::string ip;
+	std::string topic;
 
 	while (!in.eof()) {
 
-		in >> tag >> proc_name >> ip;
-		printf("[CMG][config] proc %s\t ip %s\n", proc_name.c_str(), ip.c_str());
+		in >> tag;
+		if (in.eof())
+			break;
+
 		if (tag == "-")
-			cmg::URL::RegistProc(proc_name, ip);
+			in >> proc_name >> ip;
+		else if (tag == "=") {
+
+			in >> topic;
+			//printf("[CMG][config] proc %s\t topic %s\t ip %s\n", proc_name.c_str(), topic.c_str(), ip.c_str());
+			cmg::URL::RegistProc(proc_name, topic, ip);
+		}
 	}
 
 	return true;

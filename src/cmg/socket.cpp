@@ -56,7 +56,7 @@ namespace cmg {
 		auto subs = (uint32_t) nn_get_statistic (this->sid_, NN_STAT_CURRENT_CONNECTIONS);
 		printf("Socket %s clients %d\n", this->url_().c_str(), subs);
 
-		auto str = topic + '\n' + ss.str();
+		auto str = ss.str();
 		auto ret = 0;
 		{
 			std::lock_guard<std::mutex> lck(this->msg_send_mt_);
@@ -71,7 +71,7 @@ namespace cmg {
 
 		printf("Socket send: [%s] len %d\n", topic.c_str(), ret);
 
-		return ret - topic.length() - 1;
+		return ret;
 	}
 
 	auto Socket::Client(const URL &url, unsigned wait) -> std::shared_ptr<Socket> {
@@ -106,8 +106,10 @@ namespace cmg {
 
 		this->msg_callback_ = callback;
 
+		std::string use_topic = "";
+
 		{
-			auto ret = nn_setsockopt(this->sid_, NN_SUB, NN_SUB_SUBSCRIBE, topic.c_str(), topic.length());
+			auto ret = nn_setsockopt(this->sid_, NN_SUB, NN_SUB_SUBSCRIBE, use_topic.c_str(), use_topic.length());
 			if (ret < 0) {
 
 				auto error_str = nn_strerror(nn_errno());
@@ -128,18 +130,19 @@ namespace cmg {
 			printf("Socket client set recv max size: %d\n", recv_max_size);
 		}
 
-		auto receive_job = [this, topic]() {
-
-			auto head_len = topic.length() + 1;
+		auto receive_job = [this, use_topic]() {
 
 			while (!this->exit_receive_) {
 
 				void *buf = nullptr;
 				auto len = nn_recv(this->sid_, &buf, NN_MSG, 0);
 				
-				auto recv_topic = std::string((char*)buf);
-				recv_topic = recv_topic.substr(0, recv_topic.find('\n'));
-				printf("Receiver receive len %d topic %s\n", len, recv_topic.c_str());
+				if (use_topic.length()) {
+
+					auto recv_topic = std::string((char*)buf);
+					recv_topic = recv_topic.substr(0, recv_topic.find('\n'));
+					printf("Receiver receive len %d topic %s\n", len, recv_topic.c_str());
+				}
 				if (len < 0) {
 
 					auto error_str = nn_strerror(nn_errno());
@@ -147,8 +150,7 @@ namespace cmg {
 					continue;
 				}
 
-				const char *msg = static_cast<char*>(buf) + head_len;
-				len = len - head_len;
+				const char *msg = static_cast<char*>(buf);
 
 				if (len == sizeof(u_int32_t)) {
 
