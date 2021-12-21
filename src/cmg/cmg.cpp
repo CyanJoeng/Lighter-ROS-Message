@@ -19,13 +19,13 @@ bool init_process_port(const std::string& cfg_file_path) {
 
 	if (!in.is_open()) {
 
-		std::list<std::tuple<std::string, std::string, std::string>> cfg = {
+		std::list<std::pair<std::string, std::string>> cfg = {
 
-				{"-", "station", "172.18.135.103"},
-				{"-", "client", "0.0.0.0"}
+				{"station", "172.18.135.103"},
+				{"client", "0.0.0.0"}
 		};
 
-		for (auto [tag, proc_name, ip] : cfg)
+		for (auto [proc_name, ip] : cfg)
 			cmg::URL::RegistProc(proc_name, ip);
 
 
@@ -50,7 +50,7 @@ bool init_process_port(const std::string& cfg_file_path) {
 static bool inited = false;
 static std::mutex init_mt;
 
-int cmg::init(int argc, char **argv, const char *proc_name) {
+int cmg::init(int argc, const char * const argv[], const char *proc_name) {
 
 	std::vector<std::string> args;
 	args.reserve(argc);

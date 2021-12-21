@@ -10,7 +10,7 @@
 
 namespace cmg {
 
-	int init(int argc, char *argv[], const char *proc_name);
+	int init(int argc, const char * const argv[], const char *proc_name);
 
 	int init_str(const std::vector<std::string> &args, const char *proc_name);
 

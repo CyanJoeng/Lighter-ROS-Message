@@ -3,6 +3,7 @@
  * Date: Thu Dec  2 16:56:57 CST 2021
  */
 #pragma once
+#include <mutex>
 #include <sstream>
 #include <thread>
 #include <map>
@@ -27,6 +28,8 @@ namespace cmg {
 		SsCallback msg_callback_;
 
 		std::thread reveiver_th_;
+
+		std::mutex msg_send_mt_;
 
 		bool exit_receive_ {false};
 

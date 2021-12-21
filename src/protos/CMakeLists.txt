@@ -3,7 +3,7 @@ project(proto_msg)
 find_package(Protobuf 3 REQUIRED)
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS 
-	foo_bar.proto
+	example.proto
 	std_msgs.proto
 	geometry_msgs.proto
 	sensor_msgs.proto

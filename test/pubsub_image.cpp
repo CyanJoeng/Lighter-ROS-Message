@@ -12,7 +12,6 @@
 #include <opencv2/imgproc.hpp>
 
 #include "cmg/cmg.hpp"
-#include "protos/foo_bar.pb.h"
 #include "messages/sensor_msgs/Image.hpp"
 
 using namespace cmg;
@@ -141,8 +140,6 @@ int main(int argc, char *argv[]) {
 		};
 		ui_refresh();
 	}
-
-	google::protobuf::ShutdownProtobufLibrary();
 
 	return 0;
 }

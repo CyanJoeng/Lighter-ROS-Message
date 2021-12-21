@@ -12,11 +12,12 @@ namespace cmg { namespace example_msgs {
 	class FooBarMessage : public cmg::Message {
 
 	public:
-		int id {0};
+		unsigned id {0};
+		double timestamp {0};
 		std::string extra {""};
 
 	public:
-		FooBarMessage(int id = 0, const std::string &extra = "");
+		FooBarMessage(int id = 0, double timestamp = 0., const std::string &extra = "");
 
 		virtual auto serialize(std::ostream &out) -> unsigned long final;
 

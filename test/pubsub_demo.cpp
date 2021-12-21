@@ -14,14 +14,9 @@ using namespace cmg;
 
 namespace po = boost::program_options;
 
-void cb0(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
+void cb(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
 
-	printf("client 0: %d,%s\n", msg->id, msg->extra.data());
-
-}
-
-void cb1(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
-	printf("client 1: %d,%s\n", msg->id, msg->extra.data());
+	printf("client 0: %d %f %s\n", msg->id, msg->timestamp, msg->extra.data());
 }
 
 
@@ -71,7 +66,7 @@ int main(int argc, char *argv[]) {
 	std::string topic = args["topic"].as<std::string>();
 	std::string cfg = args["cfg"].as<std::string>();
 
-	char *proc_args[] = {
+	const char *proc_args[] = {
 		argv[0],
 		cfg.data()
 	};
@@ -87,12 +82,12 @@ int main(int argc, char *argv[]) {
 
 		for (auto i = 0; i < 10;++i) {
 
-			auto msg_foo = std::make_shared<example_msgs::FooBarMessage>(i, "foo");
+			auto msg_foo = std::make_shared<example_msgs::FooBarMessage>(i, (rand() % (int)1e6) * 1e-3, "foo");
 			pub_foo.publish(msg_foo);
 
 			std::this_thread::sleep_for(std::chrono::duration<double>(1.0));
 
-			auto msg_bar = std::make_shared<example_msgs::FooBarMessage>(i, "bar");
+			auto msg_bar = std::make_shared<example_msgs::FooBarMessage>(i, (rand() % (int)1e6) * 1e-3, "bar");
 			pub_bar.publish(msg_bar);
 
 			std::this_thread::sleep_for(std::chrono::duration<double>(1.0));
@@ -109,7 +104,7 @@ int main(int argc, char *argv[]) {
 		std::stringstream ss;
 		ss << "/" << proc << "/" << topic;
 
-		auto sub = n.subscribe(ss.str(), 1000, cb0);
+		auto sub = n.subscribe(ss.str(), 1000, cb);
 		cmg::spin();
 	}
 

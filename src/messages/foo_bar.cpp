@@ -4,22 +4,21 @@
  */
 #include "foo_bar.hpp"
 #include <cstdio>
-
 #include <sstream>
 
-
-#include "protos/foo_bar.pb.h"
+#include "protos/example.pb.h"
 
 namespace cmg { namespace example_msgs {
 
-	FooBarMessage::FooBarMessage(int id, const std::string &extra)
-		: id(id), extra(extra) {}
+	FooBarMessage::FooBarMessage(int id, double timestamp, const std::string &extra)
+		: id(id), timestamp(timestamp), extra(extra) {}
 
 	auto FooBarMessage::serialize(std::ostream &out) -> unsigned long {
 
 		example::FooBar msg;
 
 		msg.set_id(this->id);
+		msg.set_timestamp(this->timestamp);
 		msg.set_extra(this->extra);
 
 		std::string msg_data;
@@ -48,8 +47,9 @@ namespace cmg { namespace example_msgs {
 		}
 
 		this->id = msg.id();
+		this->timestamp = msg.timestamp();
 		this->extra = msg.extra();
 
-		return msg.ByteSizeLong();
+		return msg_data.length();
 	}
 }}

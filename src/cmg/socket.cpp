@@ -37,14 +37,16 @@ namespace cmg {
 	auto Socket::Server(const URL &url) -> std::shared_ptr<Socket> {
 
 		auto socket = std::shared_ptr<Socket>(new Socket(NN_PUB, url));
-		auto ret = nn_bind(socket->sid_, socket->url_.bindUrl().c_str());
+
+		auto bind_url = socket->url_.bindUrl();
+		auto ret = nn_bind(socket->sid_, bind_url.c_str());
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
 			fprintf(stderr, "socket bind failed: (bind to %s %s)\n", socket->url_().c_str(), error_str);
 			throw std::runtime_error(error_str);
 		}
-		printf("Socket bind: %s\n", socket->url_().data());
+		printf("Socket bind: %s\n", bind_url.c_str());
 
 		return socket;
 	}
@@ -55,7 +57,11 @@ namespace cmg {
 		printf("Socket %s clients %d\n", this->url_().c_str(), subs);
 
 		auto str = topic + '\n' + ss.str();
-		auto ret = nn_send(this->sid_, str.c_str(), str.length(), 0);
+		auto ret = 0;
+		{
+			std::lock_guard<std::mutex> lck(this->msg_send_mt_);
+			ret = nn_send(this->sid_, str.c_str(), str.length(), 0);
+		}
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
