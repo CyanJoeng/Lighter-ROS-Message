@@ -1,9 +1,5 @@
 - station	172.18.135.103
 = match
-= foo
+= odometry
 
 - client 0.0.0.0	
-
-- server 0.0.0.0
-= foo
-= bar

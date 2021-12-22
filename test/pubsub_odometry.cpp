@@ -3,7 +3,10 @@
  * Date: Wed Dec  8 16:33:46 CST 2021
  */
 #include <cstdio>
+#include <cstdlib>
+#include <list>
 #include <mutex>
+#include <string>
 #include <thread>
 
 #include <boost/program_options.hpp>
@@ -11,34 +14,66 @@
 #include <opencv2/opencv.hpp>
 
 #include "cmg/cmg.hpp"
-#include "messages/sensor_msgs/Image.hpp"
+#include "messages/nav_msgs/Odometry.hpp"
 
 using namespace cmg;
 namespace po = boost::program_options;
 
+static std::string img_path;
 
-auto draw_odo(const std::string &img_path) -> sensor_msgs::ImagePtr {
+auto draw_odo(const cmg::nav_msgs::OdometryPtr &odometry) -> cv::Mat {
 
-	sensor_msgs::ImagePtr image(new sensor_msgs::Image);
+	static auto bg_img = cv::imread(img_path, cv::IMREAD_ANYCOLOR);
 
-	//image->header;  // img_msg->header;
-	image->header.frame_id = "world";
-	image->header.stamp.time_ = (rand() % 1000 * 1e-3);
+	cv::Mat img = bg_img.clone();
+	if (img.empty())
+		img = cv::Mat::zeros(500, 1000, CV_8UC3);
 
-	static auto ori_img = cv::imread(img_path, cv::IMREAD_ANYCOLOR);
+	cv::putText(img, "stamp: " + std::to_string(odometry->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
 
-	cv::Mat img = ori_img.clone();
+	static std::array<double, 2> max_xy {
+		0, 0
+	};
 
-	printf("cv point %d\n", img.rows/2);
-	cv::putText(img, "stamp: " + std::to_string(image->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
+	auto &position = odometry->pose.position;
+	max_xy[0] = std::max(std::fabs(position[0]), max_xy[0]);
+	max_xy[1] = std::max(std::fabs(position[1]), max_xy[1]);
 
-	img(cv::Rect(0, 0, 30, 30)) = cv::Mat::ones(30, 30, CV_8UC3) * 128;
+	static float scale = 1;
 
-	cv::Mat data;
-	img.copyTo(data);
-	image->setData(img.rows, img.cols, img.channels(), (char*)data.data);
+	auto odo_to_point = [w_2=img.cols/2, h_2=img.rows/2](auto x, auto y) -> cv::Point {
 
-	return image;
+		float scale_x = max_xy[0] * 10 > w_2 ? max_xy[0] / w_2: 1;
+		float scale_y = max_xy[1] * 10 > h_2 ? max_xy[1] / h_2: 1;
+
+		scale = std::max(scale_x, scale_y);
+
+		int off_x = (w_2 + (x * 10)) / scale + .5f;
+		int off_y = (h_2 + (y * 10)) / scale + .5f;
+
+		return {off_x, off_y};
+	};
+
+	static std::list<cmg::nav_msgs::OdometryPtr> odos;
+
+	odos.push_back(odometry);
+
+	cv::Point last_p(img.cols * .5f, img.rows * .5f);
+	for (auto odo : odos) {
+
+		auto pt = odo_to_point(odo->pose.position[0], odo->pose.position[1]);
+		cv::line(img, last_p, pt, cv::Scalar {255, 255, 0}, 2);
+
+		//std::cout << last_p << pt << std::endl;
+		last_p = pt;
+	}
+
+	return img;
+}
+
+auto create_odo(int i) -> cmg::nav_msgs::OdometryPtr {
+
+	return nullptr;
 }
 
 static cv::Mat show_img;
@@ -65,21 +100,16 @@ void ui_refresh() {
 
 static bool save_img = false;
 
-auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
+auto cb(const cmg::nav_msgs::OdometryPtr &odometry) {
 
-	printf("cb image size (%d, %d) stamp %f\n", image->rows, image->cols, image->header.stamp.toSec());
+	auto &position = odometry->pose.position;
+	printf("cb odometry stamp %f (%10.4f %10.4f %10.4f)\n", odometry->header.stamp.toSec(),
+			position[0], position[1], position[2]);
 
+	auto img = draw_odo(odometry);
 	{
-
 		std::lock_guard<std::mutex> lock(img_mt);
-		cv::Mat(image->rows, image->cols, CV_8UC(image->channels), (void*)image->data.data()).copyTo(show_img);
-	}
-	if (save_img) {
-
-		char path[64];
-		sprintf(path, "out/image_%.5f.png", image->header.stamp.toSec());
-		cv::imwrite(path, show_img);
-		printf("write image to image.png\n");
+		img.copyTo(show_img);
 	}
 }
 
@@ -92,8 +122,7 @@ auto args_parser(int argc, char *argv[]) -> po::variables_map {
 		("proc", po::value<std::string>()->default_value("server"), "server proc name")
 		("topic", po::value<std::string>()->default_value("foo"), "topic name")
 		("cfg", po::value<std::string>()->default_value(""), "config file")
-		("save_img", po::value<bool>(), "image be published")
-		("image", po::value<std::string>(), "store received image");
+		("bg_image", po::value<std::string>()->default_value(""), "background image of canvas");
 
 	po::positional_options_description pos_desc;
 	pos_desc.add("mode", 1);
@@ -115,8 +144,7 @@ auto args_parser(int argc, char *argv[]) -> po::variables_map {
 		exit(0);
 	}
 
-	if (vm.count("save_img"))
-		save_img = true;
+	img_path = vm["bg_image"].as<std::string>();
 
 	return vm;
 }
@@ -146,19 +174,14 @@ int main(int argc, char *argv[]) {
 
 		cmg::NodeHandle n("~");
 
-		auto pub_image_foo = n.advertise<sensor_msgs::Image>("foo", 1000);
-		auto pub_image_bar = n.advertise<sensor_msgs::Image>("bar", 1000);
+		auto pub_odo = n.advertise<nav_msgs::Odometry>("odometry", 1000);
 
 		for (auto i = 0; i >= 0; ++i) {
 
-			auto msg_image = draw_odo(img_path);
+			auto msg_odo = create_odo(i);
 
-			pub_image_foo.publish(msg_image);
-			printf("pub foo\n");
-			std::this_thread::sleep_for(std::chrono::duration<double>(.5));
-
-			pub_image_bar.publish(msg_image);
-			printf("pub bar\n");
+			pub_odo.publish(msg_odo);
+			printf("pub odometry\n");
 			std::this_thread::sleep_for(std::chrono::duration<double>(.5));
 		}
 

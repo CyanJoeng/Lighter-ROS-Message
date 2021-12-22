@@ -7,6 +7,7 @@
 #include "messages/message.hpp"
 #include "messages/std_msgs/Header.hpp"
 #include <array>
+#include <memory>
 #include <vector>
 
 namespace cmg { namespace nav_msgs {
@@ -29,5 +30,7 @@ namespace cmg { namespace nav_msgs {
 		virtual auto parse(std::istream &in) -> unsigned long final;
 
 	};
+
+	using OdometryPtr = std::shared_ptr<Odometry>;
 
 }}

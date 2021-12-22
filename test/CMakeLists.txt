@@ -17,3 +17,7 @@ target_link_libraries(pubsub_point_cloud cmg)
 add_executable(pubsub_image pubsub_image.cpp)
 target_link_libraries(pubsub_image cmg
 	${OpenCV_LIBS} ${Boost_LIBRARIES})
+
+add_executable(pubsub_odometry pubsub_odometry.cpp)
+target_link_libraries(pubsub_odometry cmg
+	${OpenCV_LIBS} ${Boost_LIBRARIES})
