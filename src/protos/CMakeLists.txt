@@ -7,6 +7,7 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 	std_msgs.proto
 	geometry_msgs.proto
 	sensor_msgs.proto
+	nav_msgs.proto
 	)
 
 add_library(${PROJECT_NAME} SHARED

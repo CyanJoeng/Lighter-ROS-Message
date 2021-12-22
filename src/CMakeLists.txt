@@ -13,13 +13,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 find_package(nanomsg REQUIRED)
 list(APPEND EXT_LIBS nanomsg)
 
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
 	find_package(Boost REQUIRED)
 	include_directories(${Boost_INCLUDE_DIRS})
 
 	list(APPEND MSG_SRCS messages/codex.cpp)
 	list(APPEND EXT_LIBS ${Boost_LIBRARIES})
-endif()
 
 include_directories(
 	${nanomsg_INCDIR}
@@ -44,6 +42,7 @@ list(APPEND MSG_SRCS
 	messages/geometry_msgs/point32.hpp
 	messages/sensor_msgs/PointCloud.cpp
 	messages/sensor_msgs/Image.cpp
+	messages/nav_msgs/Odometry.cpp
 	)
 
 add_library(${PROJECT_NAME} SHARED

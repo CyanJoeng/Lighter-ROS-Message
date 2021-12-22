@@ -166,8 +166,6 @@ int main(int argc, char *argv[]) {
 
 	} else if (mode == 'c') {
 
-		std::string topic = "foo";
-
 		cmg::init(2, proc_args, client_proc_name.c_str());
 
 		cmg::NodeHandle n("~");

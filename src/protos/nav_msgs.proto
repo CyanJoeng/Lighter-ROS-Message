@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package cmg_pb;
+
+import "std_msgs.proto";
+import "geometry_msgs.proto";
+
+message Odometry {
+
+	Header header = 1;
+	Pose pose = 2;
+	Twist twist = 3;
+}
+
+message Pose {
+	
+	Point position = 1;
+	Quaternion orientation = 2;
+}
+
+message Twist {
+	
+	Point linear = 1;
+}
