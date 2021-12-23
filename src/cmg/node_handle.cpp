@@ -29,4 +29,9 @@ namespace cmg {
 
 	NodeHandle::NodeHandle(const std::string &proc_connect)
 		: proc_name_(proc_connect) {};
+
+	void NodeHandle::shutdown() {
+
+		Environment::Inst(this->proc_name_).Shutdown();
+	}
 }

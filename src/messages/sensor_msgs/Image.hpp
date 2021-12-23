@@ -33,4 +33,5 @@ namespace cmg { namespace sensor_msgs {
 	};
 
 	using ImagePtr = std::shared_ptr<Image>;
+	using ImageConstPtr = const std::shared_ptr<Image>;
 }}

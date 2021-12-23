@@ -55,4 +55,13 @@ namespace cmg {
 				return Environment::insts.empty();
 			});
 	}
+
+	void Environment::Shutdown() {
+
+		{
+			std::lock_guard<std::mutex> lck(env_mt);
+			Environment::insts.clear();
+		}
+		env_cv.notify_all();
+	}
 }

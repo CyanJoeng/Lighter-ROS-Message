@@ -14,6 +14,7 @@
 
 #include "enviroment.hpp"
 #include "receiver.hpp"
+#include "utils/config.hpp"
 
 namespace cmg {
 
@@ -44,9 +45,14 @@ namespace cmg {
 	private:
 		std::string proc_name_;
 
+		std::shared_ptr<Config> config_;
+
 	public:
 		NodeHandle(const std::string &proc_connect);
 
+		void shutdown();
+
+	public:
 		template <typename Msg>
 		auto advertise(const std::string &topic, unsigned wait) -> NodePublisher {
 
@@ -82,6 +88,17 @@ namespace cmg {
 			printf("subscribe to %s/%s\n", server_proc_name.c_str(), topic.c_str());
 
 			return NodeSubscriber(Environment::Inst(server_proc_name).receiver<Msg>(topic, wait, callback));
+		}
+
+		template <typename T>
+		auto getParam(const std::string &key, T &val) -> bool {
+
+			if (!this->config_) {
+
+				printf("config not set\n");
+				return false;
+			}
+			return this->config_->get(key, val);
 		}
 	};
 

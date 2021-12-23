@@ -34,6 +34,8 @@ namespace cmg {
 
 		static void Spin();
 
+		static void Shutdown();
+
 	private:
 		static std::map<ProcType, Environment> insts;
 
