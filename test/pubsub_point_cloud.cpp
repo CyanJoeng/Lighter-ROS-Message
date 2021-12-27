@@ -15,9 +15,9 @@
 
 using namespace cmg;
 
-auto create_point_cloud() -> sensor_msgs::PointCloudPtr {
+auto create_point_cloud() -> sensor_msgs::PointCloud {
 
-	sensor_msgs::PointCloudPtr feature_points(new sensor_msgs::PointCloud);
+	sensor_msgs::PointCloud feature_points;
 
 	sensor_msgs::ChannelFloat32 id_of_point;
 	sensor_msgs::ChannelFloat32 u_of_point;
@@ -25,9 +25,9 @@ auto create_point_cloud() -> sensor_msgs::PointCloudPtr {
 	sensor_msgs::ChannelFloat32 velocity_x_of_point;
 	sensor_msgs::ChannelFloat32 velocity_y_of_point;
 
-	feature_points->header;  // img_msg->header;
-	feature_points->header.frame_id = "world";
-	feature_points->header.stamp.time_ = (rand() % 1000 * 1e-3);
+	//feature_points.header;  // img_msg->header;
+	feature_points.header.frame_id = "world";
+	feature_points.header.stamp.time_ = (rand() % 1000 * 1e-3);
 
 	for (auto i = rand() % 1000; i < 1000; ++i) {
 
@@ -36,7 +36,7 @@ auto create_point_cloud() -> sensor_msgs::PointCloudPtr {
 		p.y = i * 0.02;
 		p.z = 1;
 
-		feature_points->points.push_back(p);
+		feature_points.points.push_back(p);
 
 		id_of_point.values.push_back(i);
 		u_of_point.values.push_back(i * 10);
@@ -45,16 +45,16 @@ auto create_point_cloud() -> sensor_msgs::PointCloudPtr {
 		velocity_y_of_point.values.push_back(i * 1.1);
 	}
 
-	feature_points->channels.push_back(id_of_point);
-	feature_points->channels.push_back(u_of_point);
-	feature_points->channels.push_back(v_of_point);
-	feature_points->channels.push_back(velocity_x_of_point);
-	feature_points->channels.push_back(velocity_y_of_point);
+	feature_points.channels.push_back(id_of_point);
+	feature_points.channels.push_back(u_of_point);
+	feature_points.channels.push_back(v_of_point);
+	feature_points.channels.push_back(velocity_x_of_point);
+	feature_points.channels.push_back(velocity_y_of_point);
 
 	return feature_points;
 }
 
-auto cb(const std::shared_ptr<sensor_msgs::PointCloud> &point_cloud) {
+auto cb(const std::shared_ptr<const sensor_msgs::PointCloud> &point_cloud) {
 
 	printf("cb point_cloud count %zu stamp %f\n", point_cloud->points.size(), point_cloud->header.stamp.toSec());
 }

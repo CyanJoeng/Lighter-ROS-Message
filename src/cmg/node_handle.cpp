@@ -12,7 +12,7 @@ namespace cmg {
 	Publisher::NodePublisher(const std::shared_ptr<Sender> &sender)
 		: sender_(sender) {}
 
-	auto Publisher::publish(const std::shared_ptr<Message> &msg) -> bool {
+	auto Publisher::publish(const Message &msg) -> bool {
 
 		if (!this->sender_) {
 

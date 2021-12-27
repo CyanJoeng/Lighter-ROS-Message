@@ -13,7 +13,7 @@ namespace cmg { namespace std_msgs {
 
 		bool data {false};
 
-		virtual auto serialize(std::ostream &out) -> unsigned long {
+		virtual auto serialize(std::ostream &out) const -> unsigned long {
 
 			out.write(reinterpret_cast<const char *>(&this->data), Len);
 			return Len;
@@ -25,4 +25,6 @@ namespace cmg { namespace std_msgs {
 			return Len;
 		}
 	};
+
+	using BoolConstPtr = std::shared_ptr<const Bool>;
 }}

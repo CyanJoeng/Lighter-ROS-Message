@@ -14,7 +14,7 @@ namespace cmg { namespace example_msgs {
 	FooBarMessage::FooBarMessage(int id, double timestamp, const std::string &extra)
 		: id(id), timestamp(timestamp), extra(extra) {}
 
-	auto FooBarMessage::serialize(std::ostream &out) -> unsigned long {
+	auto FooBarMessage::serialize(std::ostream &out) const -> unsigned long {
 
 		example::FooBar msg;
 

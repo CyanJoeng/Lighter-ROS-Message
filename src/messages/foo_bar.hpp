@@ -19,7 +19,7 @@ namespace cmg { namespace example_msgs {
 	public:
 		FooBarMessage(int id = 0, double timestamp = 0., const std::string &extra = "");
 
-		virtual auto serialize(std::ostream &out) -> unsigned long final;
+		virtual auto serialize(std::ostream &out) const -> unsigned long final;
 
 		virtual auto parse(std::istream &in) -> unsigned long final; 
 	};

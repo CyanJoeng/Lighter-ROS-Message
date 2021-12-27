@@ -31,7 +31,7 @@ namespace cmg {
 
 			NodePublisher(const std::shared_ptr<Sender> &sender);
 
-			auto publish(const std::shared_ptr<Message> &msg) -> bool;
+			auto publish(const Message &msg) -> bool;
 		};
 
 		class NodeSubscriber {
@@ -39,6 +39,8 @@ namespace cmg {
 			std::shared_ptr<Receiver> receiver_;
 
 		public:
+			NodeSubscriber() = default;
+
 			NodeSubscriber(const std::shared_ptr<Receiver> &receiver);
 		};
 
@@ -60,7 +62,7 @@ namespace cmg {
 		}
 
 		template <typename Msg>
-		auto subscribe(const std::string &proc_name_topic, unsigned wait, void (*callback)(const std::shared_ptr<Msg>&)) -> NodeSubscriber {
+		auto subscribe(const std::string &proc_name_topic, unsigned wait, void (*callback)(const std::shared_ptr<const Msg>&)) -> NodeSubscriber {
 
 			printf("subscribe proc_topic %s\n", proc_name_topic.c_str());
 

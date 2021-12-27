@@ -9,7 +9,7 @@
 
 namespace cmg { namespace sensor_msgs {
 
-	auto PointCloud::serialize(std::ostream &out) -> unsigned long {
+	auto PointCloud::serialize(std::ostream &out) const -> unsigned long {
 
 		cmg_pb::PointCloud msg;
 

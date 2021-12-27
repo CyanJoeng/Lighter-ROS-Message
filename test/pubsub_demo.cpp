@@ -14,7 +14,7 @@ using namespace cmg;
 
 namespace po = boost::program_options;
 
-void cb(const std::shared_ptr<example_msgs::FooBarMessage> &msg) {
+void cb(const std::shared_ptr<const example_msgs::FooBarMessage> &msg) {
 
 	printf("client 0: %d %f %s\n", msg->id, msg->timestamp, msg->extra.data());
 }
@@ -82,12 +82,12 @@ int main(int argc, char *argv[]) {
 
 		for (auto i = 0; i < 1000;++i) {
 
-			auto msg_foo = std::make_shared<example_msgs::FooBarMessage>(i, (rand() % (int)1e6) * 1e-3, "foo");
+			auto msg_foo = example_msgs::FooBarMessage {i, (rand() % (int)1e6) * 1e-3, "foo"};
 			pub_foo.publish(msg_foo);
 
 			std::this_thread::sleep_for(std::chrono::duration<double>(1.0));
 
-			auto msg_bar = std::make_shared<example_msgs::FooBarMessage>(i, (rand() % (int)1e6) * 1e-3, "bar");
+			auto msg_bar = example_msgs::FooBarMessage {i, (rand() % (int)1e6) * 1e-3, "bar"};
 			pub_bar.publish(msg_bar);
 
 			std::this_thread::sleep_for(std::chrono::duration<double>(.5));

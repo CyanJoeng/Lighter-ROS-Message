@@ -17,26 +17,26 @@ using namespace cmg;
 namespace po = boost::program_options;
 
 
-auto draw_odo(const std::string &img_path) -> sensor_msgs::ImagePtr {
+auto draw_odo(const std::string &img_path) -> sensor_msgs::Image {
 
-	sensor_msgs::ImagePtr image(new sensor_msgs::Image);
+	sensor_msgs::Image image;
 
 	//image->header;  // img_msg->header;
-	image->header.frame_id = "world";
-	image->header.stamp.time_ = (rand() % 1000 * 1e-3);
+	image.header.frame_id = "world";
+	image.header.stamp.time_ = (rand() % 1000 * 1e-3);
 
 	static auto ori_img = cv::imread(img_path, cv::IMREAD_ANYCOLOR);
 
 	cv::Mat img = ori_img.clone();
 
 	printf("cv point %d\n", img.rows/2);
-	cv::putText(img, "stamp: " + std::to_string(image->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
+	cv::putText(img, "stamp: " + std::to_string(image.header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
 
 	img(cv::Rect(0, 0, 30, 30)) = cv::Mat::ones(30, 30, CV_8UC3) * 128;
 
 	cv::Mat data;
 	img.copyTo(data);
-	image->setData(img.rows, img.cols, img.channels(), (char*)data.data);
+	image.setData(img.rows, img.cols, img.channels(), (char*)data.data);
 
 	return image;
 }
@@ -65,7 +65,7 @@ void ui_refresh() {
 
 static bool save_img = false;
 
-auto cb(const std::shared_ptr<sensor_msgs::Image> &image) {
+auto cb(const std::shared_ptr<const sensor_msgs::Image> &image) {
 
 	printf("cb image size (%d, %d) stamp %f\n", image->rows, image->cols, image->header.stamp.toSec());
 

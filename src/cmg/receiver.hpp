@@ -23,7 +23,7 @@ namespace cmg {
 
 	public:
 		template <typename Msg>
-		using Callback = std::function<void(const std::shared_ptr<Msg>&)>;
+		using Callback = std::function<void(const std::shared_ptr<const Msg>&)>;
 
 	public:
 		virtual auto receive(std::stringstream &) -> bool = 0;

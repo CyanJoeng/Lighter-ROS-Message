@@ -14,9 +14,20 @@ namespace cmg { namespace std_msgs {
 			
 			double time_{0.0};
 
-			auto toSec() -> double { return this->time_; }
+			auto toSec() const -> double { return this->time_; }
+
+			double operator= (const double t) {
+
+				return this->time_ = t;
+			}
 		} stamp;
 
 		std::string frame_id{""};
+	};
+
+
+	struct Point3 {
+
+		double x, y, z;
 	};
 }}

@@ -7,6 +7,7 @@
 #include "messages/message.hpp"
 #include "messages/std_msgs/Header.hpp"
 #include <array>
+#include <google/protobuf/io/coded_stream.h>
 #include <memory>
 #include <vector>
 
@@ -18,19 +19,29 @@ namespace cmg { namespace nav_msgs {
 
 		struct {
 
-			std::array<double, 3> position;
-			std::array<double, 4> orientation;
+			struct {
+				double x, y, z;
+			} position;
+
+			struct {
+				double x, y, z, w;
+			} orientation;
 
 		} pose;
 
-		std::array<double, 3> twist;
+		struct {
+			double x, y, z;
 
-		virtual auto serialize(std::ostream &out) -> unsigned long final;
+		} twist;
+
+		virtual auto serialize(std::ostream &out) const -> unsigned long final;
 
 		virtual auto parse(std::istream &in) -> unsigned long final;
 
 	};
 
 	using OdometryPtr = std::shared_ptr<Odometry>;
+
+	using OdometryConstPtr = std::shared_ptr<const Odometry>;
 
 }}

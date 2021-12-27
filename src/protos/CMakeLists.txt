@@ -1,4 +1,4 @@
-project(proto_msg)
+project(cmg_proto_msg)
 
 find_package(Protobuf 3 REQUIRED)
 

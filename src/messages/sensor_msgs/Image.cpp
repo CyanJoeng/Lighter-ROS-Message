@@ -14,7 +14,7 @@ namespace cmg { namespace sensor_msgs{
 
 	using namespace google::protobuf;
 
-	auto Image::serialize(std::ostream &out) -> unsigned long {
+	auto Image::serialize(std::ostream &out) const -> unsigned long {
 
 #if 0
 		out.write((char*)&this->rows, sizeof(this->rows));

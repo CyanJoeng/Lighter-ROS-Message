@@ -7,3 +7,9 @@ message Header {
 	double stamp_sec = 1;
 	string frame_id = 2;
 }
+
+message StampedFloat64Array {
+	
+	Header header = 1;
+	repeated double data = 2;
+}

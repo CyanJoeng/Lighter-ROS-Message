@@ -21,7 +21,7 @@ namespace cmg {
 		virtual ~Sender() {}
 
 	public:
-		virtual auto send(const std::shared_ptr<Message> &msg) -> bool = 0;
+		virtual auto send(const Message &msg) -> bool = 0;
 	};
 
 
@@ -39,10 +39,10 @@ namespace cmg {
 
 		~SocketSender() {}
 
-		virtual auto send(const std::shared_ptr<Message> &msg) -> bool final {
+		virtual auto send(const Message &msg) -> bool final {
 
 			std::stringstream ss;
-			auto length = msg->serialize(ss);
+			auto length = msg.serialize(ss);
 
 			if (ss.str().length() != length) {
 

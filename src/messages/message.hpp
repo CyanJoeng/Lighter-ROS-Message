@@ -16,7 +16,7 @@ namespace cmg {
 		virtual ~Message() {}
 
 	public:
-		virtual auto serialize(std::ostream &out) -> unsigned long = 0;
+		virtual auto serialize(std::ostream &out) const -> unsigned long = 0;
 
 		virtual auto parse(std::istream &in) -> unsigned long = 0;
 	};
@@ -35,7 +35,7 @@ namespace cmg {
 
 		~StrMessage() {}
 
-		virtual auto serialize(std::ostream &out) -> unsigned long final {
+		virtual auto serialize(std::ostream &out) const -> unsigned long final {
 
 			out.write(this->data_.data(), this->data_.length());
 			return this->data_.length();

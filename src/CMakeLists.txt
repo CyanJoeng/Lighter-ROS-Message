@@ -42,7 +42,10 @@ list(APPEND MSG_SRCS
 	messages/geometry_msgs/point32.hpp
 	messages/sensor_msgs/PointCloud.cpp
 	messages/sensor_msgs/Image.cpp
+	messages/sensor_msgs/Imu.cpp
+	messages/sensor_msgs/NavSatFix.cpp
 	messages/nav_msgs/Odometry.cpp
+	messages/StampedFloat64Array.cpp
 	)
 
 add_library(${PROJECT_NAME} SHARED
@@ -52,6 +55,6 @@ add_library(${PROJECT_NAME} SHARED
 target_link_libraries(${PROJECT_NAME} 
 	${EXT_LIBS}
 
-	proto_msg
+	cmg_proto_msg
 	)
 

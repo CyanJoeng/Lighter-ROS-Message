@@ -26,11 +26,12 @@ namespace cmg { namespace sensor_msgs {
 		std::vector<ChannelFloat32> channels;
 
 	public:
-		virtual auto serialize(std::ostream &out) -> unsigned long final;
+		virtual auto serialize(std::ostream &out) const -> unsigned long final;
 
 		virtual auto parse(std::istream &in) -> unsigned long final;
 	};
 
 
 	using PointCloudPtr = std::shared_ptr<PointCloud>;
+	using PointCloudConstPtr = std::shared_ptr<const PointCloud>;
 }}

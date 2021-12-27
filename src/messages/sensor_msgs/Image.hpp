@@ -25,7 +25,7 @@ namespace cmg { namespace sensor_msgs {
 
 		std::vector<char> data;
 	
-		virtual auto serialize(std::ostream &out) -> unsigned long final;
+		virtual auto serialize(std::ostream &out) const -> unsigned long final;
 
 		virtual auto parse(std::istream &in) -> unsigned long final;
 
@@ -33,5 +33,5 @@ namespace cmg { namespace sensor_msgs {
 	};
 
 	using ImagePtr = std::shared_ptr<Image>;
-	using ImageConstPtr = const std::shared_ptr<Image>;
+	using ImageConstPtr = std::shared_ptr<const Image>;
 }}

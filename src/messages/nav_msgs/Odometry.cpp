@@ -12,7 +12,7 @@
 
 namespace cmg { namespace nav_msgs {
 
-	auto Odometry::serialize(std::ostream &out) -> unsigned long {
+	auto Odometry::serialize(std::ostream &out) const -> unsigned long {
 
 		cmg_pb::Odometry msg;
 
@@ -22,19 +22,19 @@ namespace cmg { namespace nav_msgs {
 
 		auto pose = msg.mutable_pose();
 		auto position = pose->mutable_position();
-		position->set_x(this->pose.position[0]);
-		position->set_y(this->pose.position[1]);
-		position->set_z(this->pose.position[2]);
+		position->set_x(this->pose.position.x);
+		position->set_y(this->pose.position.y);
+		position->set_z(this->pose.position.z);
 		auto orientation = pose->mutable_orientation();
-		orientation->set_x(this->pose.orientation[0]);
-		orientation->set_y(this->pose.orientation[1]);
-		orientation->set_z(this->pose.orientation[2]);
-		orientation->set_w(this->pose.orientation[3]);
+		orientation->set_x(this->pose.orientation.x);
+		orientation->set_y(this->pose.orientation.y);
+		orientation->set_z(this->pose.orientation.z);
+		orientation->set_w(this->pose.orientation.w);
 
 		auto twist_linear = msg.mutable_twist()->mutable_linear();
-		twist_linear->set_x(this->twist[0]);
-		twist_linear->set_y(this->twist[1]);
-		twist_linear->set_z(this->twist[2]);
+		twist_linear->set_x(this->twist.x);
+		twist_linear->set_y(this->twist.y);
+		twist_linear->set_z(this->twist.z);
 
 		std::string msg_data;
 		
@@ -68,17 +68,17 @@ namespace cmg { namespace nav_msgs {
 		this->header.stamp.time_ = msg.header().stamp_sec();
 		this->header.frame_id = msg.header().frame_id();
 
-		this->pose.position[0] = msg.pose().position().x();
-		this->pose.position[1] = msg.pose().position().y();
-		this->pose.position[2] = msg.pose().position().z();
-		this->pose.orientation[0] = msg.pose().orientation().x();
-		this->pose.orientation[1] = msg.pose().orientation().y();
-		this->pose.orientation[2] = msg.pose().orientation().z();
-		this->pose.orientation[3] = msg.pose().orientation().w();
+		this->pose.position.x = msg.pose().position().x();
+		this->pose.position.y = msg.pose().position().y();
+		this->pose.position.z = msg.pose().position().z();
+		this->pose.orientation.x = msg.pose().orientation().x();
+		this->pose.orientation.y = msg.pose().orientation().y();
+		this->pose.orientation.z = msg.pose().orientation().z();
+		this->pose.orientation.w = msg.pose().orientation().w();
 
-		this->twist[0] = msg.twist().linear().x();
-		this->twist[1] = msg.twist().linear().y();
-		this->twist[2] = msg.twist().linear().z();
+		this->twist.x = msg.twist().linear().x();
+		this->twist.y = msg.twist().linear().y();
+		this->twist.z = msg.twist().linear().z();
 
 		return msg_data.length();
 	}

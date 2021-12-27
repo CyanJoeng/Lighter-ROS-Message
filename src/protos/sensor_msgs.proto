@@ -28,3 +28,18 @@ message Image {
 	int32 channels = 4;
 	bytes data = 5;
 }
+
+message Imu {
+
+	Header header = 1;
+	Point linear_acceleration = 2;
+	Point angular_velocity = 3;
+}
+
+message NavSatFix {
+	
+	Header header = 1;
+	double latitude = 2;
+	double longitude = 3;
+	double altitude = 4;
+}

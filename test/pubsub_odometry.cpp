@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <list>
 #include <mutex>
+#include <opencv2/core/types.hpp>
 #include <string>
 #include <thread>
 
@@ -21,7 +22,7 @@ namespace po = boost::program_options;
 
 static std::string img_path;
 
-auto draw_odo(const cmg::nav_msgs::OdometryPtr &odometry) -> cv::Mat {
+auto draw_odo(const cmg::nav_msgs::OdometryConstPtr &odometry) -> cv::Mat {
 
 	static auto bg_img = cv::imread(img_path, cv::IMREAD_ANYCOLOR);
 
@@ -31,20 +32,18 @@ auto draw_odo(const cmg::nav_msgs::OdometryPtr &odometry) -> cv::Mat {
 
 	cv::putText(img, "stamp: " + std::to_string(odometry->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
 
-	static std::array<double, 2> max_xy {
-		0, 0
-	};
+	static cv::Point2d max_xy;
 
 	auto &position = odometry->pose.position;
-	max_xy[0] = std::max(std::fabs(position[0]), max_xy[0]);
-	max_xy[1] = std::max(std::fabs(position[1]), max_xy[1]);
+	max_xy.x = std::max(std::fabs(position.x), max_xy.x);
+	max_xy.y = std::max(std::fabs(position.y), max_xy.y);
 
 	static float scale = 1;
 
 	auto odo_to_point = [w_2=img.cols/2, h_2=img.rows/2](auto x, auto y) -> cv::Point {
 
-		float scale_x = max_xy[0] * 10 > w_2 ? max_xy[0] / w_2: 1;
-		float scale_y = max_xy[1] * 10 > h_2 ? max_xy[1] / h_2: 1;
+		float scale_x = max_xy.x * 10 > w_2 ? max_xy.x / w_2: 1;
+		float scale_y = max_xy.y * 10 > h_2 ? max_xy.y / h_2: 1;
 
 		scale = std::max(scale_x, scale_y);
 
@@ -54,14 +53,14 @@ auto draw_odo(const cmg::nav_msgs::OdometryPtr &odometry) -> cv::Mat {
 		return {off_x, off_y};
 	};
 
-	static std::list<cmg::nav_msgs::OdometryPtr> odos;
+	static std::list<cmg::nav_msgs::OdometryConstPtr> odos;
 
 	odos.push_back(odometry);
 
 	cv::Point last_p(img.cols * .5f, img.rows * .5f);
 	for (auto odo : odos) {
 
-		auto pt = odo_to_point(odo->pose.position[0], odo->pose.position[1]);
+		auto pt = odo_to_point(odo->pose.position.x, odo->pose.position.y);
 		cv::line(img, last_p, pt, cv::Scalar {255, 255, 0}, 2);
 
 		//std::cout << last_p << pt << std::endl;
@@ -71,9 +70,9 @@ auto draw_odo(const cmg::nav_msgs::OdometryPtr &odometry) -> cv::Mat {
 	return img;
 }
 
-auto create_odo(int i) -> cmg::nav_msgs::OdometryPtr {
+auto create_odo(int i) -> cmg::nav_msgs::Odometry {
 
-	return nullptr;
+	return {};
 }
 
 static cv::Mat show_img;
@@ -100,11 +99,11 @@ void ui_refresh() {
 
 static bool save_img = false;
 
-auto cb(const cmg::nav_msgs::OdometryPtr &odometry) {
+auto cb(const cmg::nav_msgs::OdometryConstPtr &odometry) {
 
 	auto &position = odometry->pose.position;
 	printf("cb odometry stamp %f (%10.4f %10.4f %10.4f)\n", odometry->header.stamp.toSec(),
-			position[0], position[1], position[2]);
+			position.x, position.y, position.z);
 
 	auto img = draw_odo(odometry);
 	{
