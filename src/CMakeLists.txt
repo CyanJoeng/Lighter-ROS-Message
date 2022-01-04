@@ -10,8 +10,9 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
+find_package(OpenCV 4 REQUIRED)
 find_package(nanomsg REQUIRED)
-list(APPEND EXT_LIBS nanomsg)
+list(APPEND EXT_LIBS nanomsg ${OpenCV_LIBS})
 
 	find_package(Boost REQUIRED)
 	include_directories(${Boost_INCLUDE_DIRS})
@@ -26,7 +27,11 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	)
 
-list(APPEND CMG_SRCS
+list(APPEND CMG_SRCS  # utils
+	utils/config.cpp
+	)
+
+list(APPEND CMG_SRCS  # cmg logic
 	cmg/cmg.cpp
 	cmg/url.cpp
 	cmg/socket.cpp
@@ -36,10 +41,9 @@ list(APPEND CMG_SRCS
 
 add_subdirectory(protos)
 
-list(APPEND MSG_SRCS
+list(APPEND CMG_SRCS  # messages 
+	messages/codex.cpp
 	messages/foo_bar.cpp
-	messages/std_msgs/Header.hpp
-	messages/geometry_msgs/point32.hpp
 	messages/sensor_msgs/PointCloud.cpp
 	messages/sensor_msgs/Image.cpp
 	messages/sensor_msgs/Imu.cpp
@@ -48,10 +52,7 @@ list(APPEND MSG_SRCS
 	messages/StampedFloat64Array.cpp
 	)
 
-add_library(${PROJECT_NAME} SHARED
-	${CMG_SRCS}
-	${MSG_SRCS}
-	)
+add_library(${PROJECT_NAME} SHARED ${CMG_SRCS})
 target_link_libraries(${PROJECT_NAME} 
 	${EXT_LIBS}
 

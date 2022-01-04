@@ -6,11 +6,14 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <list>
 
 #include "sender.hpp"
 #include "receiver.hpp"
 #include "socket.hpp"
 #include "url.hpp"
+
+#include "utils/config.hpp"
 
 namespace cmg {
 
@@ -29,15 +32,21 @@ namespace cmg {
 
 		using ProcType = std::string;
 
+	private:
+		static std::list<Environment> env_insts_;
+
+		static std::shared_ptr<cmg::Config> config_;
+
 	public:
 		static auto Inst(const std::string &proc_name = "") -> Environment&;
+
+		static auto Config(const std::string &config_file) -> bool;
+
+		static auto Config() -> const cmg::Config&;
 
 		static void Spin();
 
 		static void Shutdown();
-
-	private:
-		static std::map<ProcType, Environment> insts;
 
 	public:
 		~Environment();

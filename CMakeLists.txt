@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.10)
 
 project(CMG)
 
+option(CMG_BUILD_APPS "build CMG test apps" ON)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
@@ -13,6 +15,6 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}/src
 	)
 
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
+if (${CMG_BUILD_APPS})
 	add_subdirectory(test)
 endif()

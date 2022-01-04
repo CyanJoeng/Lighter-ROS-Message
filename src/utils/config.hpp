@@ -5,30 +5,37 @@
 #pragma once
 
 #include <map>
-#include <any>
 #include <string>
+
+#include <opencv2/core/persistence.hpp>
+
 
 namespace cmg {
 
-	class Config : private std::map<std::string, std::any> {
+	class Config : private cv::FileStorage {
 
 	public:
 		Config(const std::string &file_path);
 
 		template <typename T>
-		auto get(const std::string &key, T &val) -> bool {
+		auto get(const std::string &key, T &val) const -> bool {
 
-			auto it = this->find(key);
-			if (this->end() == it)
+			auto root = this->root();
+			auto it = std::find_if(root.begin(), root.end(), [&key](auto it) {
+
+					return it.name() == key;
+					});
+			if (root.end() == it)
 				return false;
 
-			val = std::any_cast<T>(*it);
+			val = this->get<T>(key);
 			return true;
 		}
 
 		template <typename T>
-		auto operator[] (const std::string &key) -> T {
-			return std::any_cast<T>(this->at(key));
+		auto get(const std::string &key) const -> T {
+
+			return (*this)[key];
 		}
 	};
 }

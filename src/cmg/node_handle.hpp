@@ -4,13 +4,16 @@
  */
 #pragma once
 #include <cstdio>
+#include <exception>
 #include <functional>
+#include <stdexcept>
 #include <string>
 #include <memory>
 #include <list>
 #include <vector>
 
-//#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>
+
 
 #include "enviroment.hpp"
 #include "receiver.hpp"
@@ -47,7 +50,7 @@ namespace cmg {
 	private:
 		std::string proc_name_;
 
-		std::shared_ptr<Config> config_;
+		const cmg::Config &config_;
 
 	public:
 		NodeHandle(const std::string &proc_connect);
@@ -95,12 +98,16 @@ namespace cmg {
 		template <typename T>
 		auto getParam(const std::string &key, T &val) -> bool {
 
-			if (!this->config_) {
+			try {
 
-				printf("config not set\n");
-				return false;
+				this->config_.get<T>(key, val);
+				val = this->config_.get<T>(key);
+			} catch (const std::exception &e) {
+
+				printf("[NodeHandle]getParam error %s %s\n", key.c_str(), typeid(T).name());
+				throw std::runtime_error(e.what());
 			}
-			return this->config_->get(key, val);
+			return true;
 		}
 	};
 
