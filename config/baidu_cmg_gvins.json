@@ -1,0 +1,23 @@
+{
+	"cmg": {
+		"procs": [
+			{
+				"name": "cam1",
+				"ip": "0.0.0.0",
+				"topics": [
+					"image_raw"
+				]
+			},
+			{
+				"name": "feature_tracker",
+				"ip": "0.0.0.0",
+				"topics": [
+					"feature",
+					"feature_img",
+					"restart"
+				]
+			}
+		]
+	},
+	"gvins_cfg": "./config/visensor_f9p/visensor_left_f9p_config.yaml"
+}
