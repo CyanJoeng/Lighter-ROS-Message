@@ -4,10 +4,11 @@
  */
 #include "config.hpp"
 
-#include <opencv2/core/persistence.hpp>
 #include <stdexcept>
 #include <vector>
 #include <list>
+
+#include <opencv2/core/persistence.hpp>
 
 #include "cmg/url.hpp"
 
@@ -61,11 +62,17 @@ namespace cmg {
 		if (file_path.empty())
 			throw std::runtime_error("[cmg][Config]Config config_file is empty");
 
-		this->open(file_path, cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
-		if (!this->isOpened())
+		auto cfg = cv::FileStorage(file_path, cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
+		if (!cfg.isOpened())
 			throw std::runtime_error("[cmg][Config]Config config_file can not opened");
 
-		auto cmg = this->operator []("cmg");
+		auto cmg = cfg["cmg"];
 		init_process_port(cmg["procs"]);
+
+		auto root = cfg.root();
+		for (auto it : root) {
+
+			this->emplace(it.name(), it);
+		}
 	}
 }

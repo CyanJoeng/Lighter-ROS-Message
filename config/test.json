@@ -1,0 +1,35 @@
+{
+	"cmg": {
+		"procs": [
+			{
+				"name": "server",
+				"ip": "0.0.0.0",
+				"topics": [
+					"foo",
+					"bar"
+				]
+			},
+			{
+				"name": "client",
+				"ip": "0.0.0.0",
+				"topics": [
+				]
+			},
+			{
+				"name": "station",
+				"ip": "172.18.135.103",
+				"topics": [
+					"match",
+					"odometry"
+				]
+			},
+			{
+				"name": "cam1",
+				"ip": "172.18.135.103",
+				"topics": [
+					"image_raw"
+				]
+			}
+		]
+	}
+}
