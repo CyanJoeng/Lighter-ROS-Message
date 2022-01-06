@@ -31,6 +31,11 @@ namespace cmg {
 	public:
 		Log(LogType type) : type_(type) {}
 
+		Log(const Log &inst) {
+
+			this->str(inst.str());
+		}
+
 		~Log() {
 
 			printf("%s\n", this->str().c_str());
@@ -55,13 +60,13 @@ namespace cmg {
 			*this << buf;
 		}
 
-		static auto Info() -> Log { return Log {LogType::INFO}; }
+		static auto Info() -> Log { return {LogType::INFO}; }
 
-		static auto Debug() -> Log { return Log {LogType::DEBUG}; }
+		static auto Debug() -> Log { return {LogType::DEBUG}; }
 
-		static auto Warn() -> Log { return Log {LogType::WARN}; }
+		static auto Warn() -> Log { return {LogType::WARN}; }
 
-		static auto Error() -> Log { return Log {LogType::ERROR}; }
+		static auto Error() -> Log { return {LogType::ERROR}; }
 	};
 }
 
