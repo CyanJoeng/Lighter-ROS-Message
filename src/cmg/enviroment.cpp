@@ -11,7 +11,6 @@
 #include <mutex>
 #include <condition_variable>
 
-#include <opencv2/core.hpp>
 
 namespace cmg {
 

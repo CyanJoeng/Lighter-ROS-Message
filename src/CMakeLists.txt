@@ -10,9 +10,8 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-find_package(OpenCV 4 REQUIRED)
 find_package(nanomsg REQUIRED)
-list(APPEND EXT_LIBS nanomsg ${OpenCV_LIBS})
+list(APPEND EXT_LIBS nanomsg)
 
 find_package(Boost REQUIRED )
 include_directories(${Boost_INCLUDE_DIRS})
@@ -22,7 +21,6 @@ list(APPEND EXT_LIBS ${Boost_LIBRARIES})
 
 include_directories(
 	${nanomsg_INCDIR}
-	${OpenCV_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
 	)
