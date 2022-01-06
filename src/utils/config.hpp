@@ -6,12 +6,17 @@
 
 #include <map>
 #include <any>
+#include <vector>
 #include <string>
+
+#include <boost/json.hpp>
 
 
 namespace cmg {
 
-	class Config : private std::map<std::string, std::any> {
+	class Config {
+
+		boost::json::value data_;
 
 	public:
 		Config(const std::string &file_path);
@@ -19,18 +24,32 @@ namespace cmg {
 		template <typename T>
 		auto get(const std::string &key, T &val) const -> bool {
 
-			auto it = this->find(key);
-			if (this->end() == it)
-				return false;
+			try {
 
-			val = this->get<T>(key);
-			return true;
+				auto it = this->data_.at(key);
+				val = boost::json::value_to<T>(it);
+				return true;
+			} catch (const boost::exception &e) {
+				
+				printf("[Config](get) can not find item with key %s\n", key.c_str());
+				return false;
+			}
+		}
+
+		template <typename T>
+		auto get(const std::vector<std::string> &keys) const -> T {
+
+			boost::json::value it = this->data_;
+			for (auto &key : keys)
+				it = it.at(key);
+
+			return boost::json::value_to<T>(it);
 		}
 
 		template <typename T>
 		auto get(const std::string &key) const -> T {
 
-			auto val = this->at(key);
+			return boost::json::value_to<T>(this->data_.at(key));
 		}
 	};
 }

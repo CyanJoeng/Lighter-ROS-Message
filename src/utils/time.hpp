@@ -11,18 +11,18 @@ namespace cmg {
 	class Time {
 
 	public:
-		struct TimePoint : public std::chrono::time_point<std::chrono::steady_clock, std::chrono::milliseconds> {
+		struct TimePoint {
 
 			using TP = std::chrono::time_point<std::chrono::steady_clock>;
 
-			TimePoint(const TP &t) {
+			TP tp_;
 
-				*this = t;
-			}
+			TimePoint(const TP &tp) : tp_(tp) {}
 
 			auto toSec() -> double {
 
-				return this->time_since_epoch().count() * 1e-3;
+				return std::chrono::duration_cast<std::chrono::seconds>(
+						this->tp_.time_since_epoch()).count();
 			}
 		};
 

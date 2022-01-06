@@ -14,11 +14,11 @@ find_package(OpenCV 4 REQUIRED)
 find_package(nanomsg REQUIRED)
 list(APPEND EXT_LIBS nanomsg ${OpenCV_LIBS})
 
-	find_package(Boost REQUIRED)
-	include_directories(${Boost_INCLUDE_DIRS})
+find_package(Boost REQUIRED )
+include_directories(${Boost_INCLUDE_DIRS})
 
-	list(APPEND MSG_SRCS messages/codex.cpp)
-	list(APPEND EXT_LIBS ${Boost_LIBRARIES})
+list(APPEND MSG_SRCS messages/codex.cpp)
+list(APPEND EXT_LIBS ${Boost_LIBRARIES})
 
 include_directories(
 	${nanomsg_INCDIR}

@@ -3,7 +3,7 @@
 		"procs": [
 			{
 				"name": "cam1",
-				"ip": "0.0.0.0",
+				"ip": "172.18.135.103",
 				"topics": [
 					"image_raw"
 				]
@@ -15,6 +15,14 @@
 					"feature",
 					"feature_img",
 					"restart"
+				]
+			},
+			{
+				"name": "station",
+				"ip": "172.18.135.103",
+				"topics": [
+					"match",
+					"odometry"
 				]
 			}
 		]

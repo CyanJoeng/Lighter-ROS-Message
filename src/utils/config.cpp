@@ -4,17 +4,21 @@
  */
 #include "config.hpp"
 
+#include <algorithm>
+#include <fstream>
+#include <iterator>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 #include <list>
 
-#include <opencv2/core/persistence.hpp>
+#include <boost/json/src.hpp>
 
 #include "cmg/url.hpp"
 
 namespace cmg {
 
-	static auto init_process_port(const cv::FileNode &node) -> bool {
+	static auto init_process_port(const boost::json::array &node) -> bool {
 
 		struct _IT {
 
@@ -23,7 +27,7 @@ namespace cmg {
 			std::vector<std::string> topics;
 		};
 
-		if (node.size() == 0) {
+		if (node.empty()) {
 
 			std::list<_IT> cfg = {
 
@@ -44,13 +48,13 @@ namespace cmg {
 
 		for (auto proc : node) {
 
-			std::string proc_name = proc["name"];
-			std::string ip = proc["ip"];
+			std::string proc_name = proc.at("name").as_string().c_str();
+			std::string ip = proc.at("ip").as_string().c_str();
 
-			for (auto topic : proc["topics"]) {
+			for (auto topic : proc.at("topics").as_array()) {
 
 				//printf("[CMG][config] proc %s\t topic %s\t ip %s\n", proc_name.c_str(), topic.c_str(), ip.c_str());
-				cmg::URL::RegistProc(proc_name, topic, ip);
+				cmg::URL::RegistProc(proc_name, topic.as_string().c_str(), ip);
 			}
 		}
 
@@ -62,17 +66,16 @@ namespace cmg {
 		if (file_path.empty())
 			throw std::runtime_error("[cmg][Config]Config config_file is empty");
 
-		auto cfg = cv::FileStorage(file_path, cv::FileStorage::READ | cv::FileStorage::FORMAT_JSON);
-		if (!cfg.isOpened())
+		auto json_file = std::ifstream(file_path);
+		if (!json_file.is_open())
 			throw std::runtime_error("[cmg][Config]Config config_file can not opened");
 
-		auto cmg = cfg["cmg"];
-		init_process_port(cmg["procs"]);
+		std::stringstream ss;
+		std::copy(std::istreambuf_iterator<char>(json_file), std::istreambuf_iterator<char>(), std::ostream_iterator<char>(ss));
 
-		auto root = cfg.root();
-		for (auto it : root) {
+		this->data_ = boost::json::parse(ss.str());
 
-			this->emplace(it.name(), it);
-		}
+		auto cmg = this->data_.at("cmg");
+		init_process_port(cmg.at("procs").as_array());
 	}
 }

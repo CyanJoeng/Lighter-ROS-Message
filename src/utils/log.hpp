@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <functional>
+#include <tuple>
 #include <vector>
 #include <map>
 #include <sstream>
@@ -49,7 +50,7 @@ namespace cmg {
 			std::string buf;
 			buf.resize(256);
 
-			sprintf(buf.data(), fmt, args...);
+			std::apply(sprintf, std::tuple_cat(std::make_tuple(buf.data(), fmt), std::make_tuple(args...)));
 
 			*this << buf;
 		}
