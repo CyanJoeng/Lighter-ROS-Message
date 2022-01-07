@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 find_package(nanomsg REQUIRED)
 list(APPEND EXT_LIBS nanomsg)
 
-find_package(Boost REQUIRED )
+find_package(Boost REQUIRED iostreams)
 include_directories(${Boost_INCLUDE_DIRS})
 
 list(APPEND MSG_SRCS messages/codex.cpp)

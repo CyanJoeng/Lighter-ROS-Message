@@ -14,4 +14,11 @@ namespace cmg {
 
 		static auto decode64(const std::string &cipher) -> std::string;
 	};
+
+	struct Zip {
+
+		static auto compress(const std::string &plaint) -> std::string;
+
+		static auto decompress(const std::string &compacted) -> std::string;
+	};
 }
