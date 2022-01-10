@@ -1,26 +1,29 @@
 project(cmg)
 
-if (NOT DEFINED nanomsg_DIR)
-	set(nanomsg_DIR $ENV{PREFIX}/local/lib/cmake/nanomsg-1.1.5)
-endif()
-
-if(NOT DEFINED Boost_DIR)
-	set(Boost_DIR $ENV{PREFIX}/lib/cmake/Boost-1.77.0)
-endif()
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 find_package(nanomsg REQUIRED)
 list(APPEND EXT_LIBS nanomsg)
 
-find_package(Boost REQUIRED iostreams)
-include_directories(${Boost_INCLUDE_DIRS})
+find_package(Boost 1.75.0 COMPONENTS iostreams
+	HINTS ${Boost_DIR})
+
+if (NOT Boost_FOUND)
+	message("set Boost manually")
+	message("Boost include dir ${Boost_INCLUDE_DIR}")
+	message("Boost lib dir ${Boost_LIBRARY_DIR}")
+
+	set(Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIR})
+	file(GLOB Boost_LIBRARIES LIST_DIRECTORIES false
+		${Boost_LIBRARY_DIR}/libboost_*.a)
+endif()
 
 list(APPEND MSG_SRCS messages/codex.cpp)
-list(APPEND EXT_LIBS ${Boost_LIBRARIES})
+list(APPEND EXT_LIBS ${Boost_LIBRARIES} z)
 
 include_directories(
 	${nanomsg_INCDIR}
+	${Boost_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
 	)

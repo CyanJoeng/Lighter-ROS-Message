@@ -3,14 +3,12 @@
  * Date: Tue Dec  7 23:30:10 CST 2021
  */
 
-#include "cmg/cmg.hpp"
-#include "messages/sensor_msgs/PointCloud.hpp"
-#include "protos/geometry_msgs.pb.h"
-#include "protos/sensor_msgs.pb.h"
-#include "protos/std_msgs.pb.h"
 #include <cstdio>
 #include <cstdlib>
 #include <memory>
+
+#include "cmg/cmg.hpp"
+#include "messages/sensor_msgs/PointCloud.hpp"
 
 
 using namespace cmg;
@@ -95,8 +93,6 @@ int main(int argc, char *argv[]) {
 		auto sub = n.subscribe(proc_topic, 1000, cb);
 		cmg::spin();
 	}
-
-	google::protobuf::ShutdownProtobufLibrary();
 
 	return 0;
 }

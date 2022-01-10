@@ -28,27 +28,30 @@ auto draw_odo(const cmg::nav_msgs::OdometryConstPtr &odometry) -> cv::Mat {
 
 	cv::Mat img = bg_img.clone();
 	if (img.empty())
-		img = cv::Mat::zeros(500, 1000, CV_8UC3);
+		img = cv::Mat::zeros(500, 500, CV_8UC3);
 
-	cv::putText(img, "stamp: " + std::to_string(odometry->header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
+	cv::putText(img, "stamp: " + std::to_string(odometry->header.stamp.toSec()), cv::Point(0, 10), 0, .5, cv::Scalar {255, 255, 0}, 1);
 
 	static cv::Point2d max_xy;
 
+	static float w_2 = img.cols * .5f;
+	static float h_2 = img.rows * .5f;
+
 	auto &position = odometry->pose.position;
-	max_xy.x = std::max(std::fabs(position.x), max_xy.x);
-	max_xy.y = std::max(std::fabs(position.y), max_xy.y);
+	max_xy.x = std::max(std::fabs(position.x * 10), max_xy.x);
+	max_xy.y = std::max(std::fabs(position.y * 10), max_xy.y);
 
 	static float scale = 1;
 
+	float scale_x = max_xy.x > w_2 ? max_xy.x / w_2: 1;
+	float scale_y = max_xy.y > h_2 ? max_xy.y / h_2: 1;
+
+	scale = std::max(scale_x, scale_y);
+
 	auto odo_to_point = [w_2=img.cols/2, h_2=img.rows/2](auto x, auto y) -> cv::Point {
 
-		float scale_x = max_xy.x * 10 > w_2 ? max_xy.x / w_2: 1;
-		float scale_y = max_xy.y * 10 > h_2 ? max_xy.y / h_2: 1;
-
-		scale = std::max(scale_x, scale_y);
-
-		int off_x = (w_2 + (x * 10)) / scale + .5f;
-		int off_y = (h_2 + (y * 10)) / scale + .5f;
+		int off_x = w_2 + (x * 10) / scale + .5f;
+		int off_y = h_2 + (y * 10) / scale + .5f;
 
 		return {off_x, off_y};
 	};
@@ -57,11 +60,12 @@ auto draw_odo(const cmg::nav_msgs::OdometryConstPtr &odometry) -> cv::Mat {
 
 	odos.push_back(odometry);
 
-	cv::Point last_p(img.cols * .5f, img.rows * .5f);
+	cv::Point last_p = odo_to_point(odos.front()->pose.position.x * 10, odos.front()->pose.position.y * 10);
+
 	for (auto odo : odos) {
 
 		auto pt = odo_to_point(odo->pose.position.x, odo->pose.position.y);
-		cv::line(img, last_p, pt, cv::Scalar {255, 255, 0}, 2);
+		cv::line(img, last_p, pt, cv::Scalar {255, 255, 0}, 1);
 
 		//std::cout << last_p << pt << std::endl;
 		last_p = pt;
