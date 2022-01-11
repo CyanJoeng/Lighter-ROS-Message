@@ -2,10 +2,11 @@
 	"cmg": {
 		"procs": [
 			{
-				"name": "cam1",
+				"name": "data",
 				"ip": "172.18.135.103",
 				"topics": [
-					"image_raw"
+					"image_raw",
+					"imu_raw"
 				]
 			},
 			{
@@ -15,6 +16,13 @@
 					"feature",
 					"feature_img",
 					"restart"
+				]
+			},
+			{
+				"name": "estimator",
+				"ip": "0.0.0.0",
+				"topics": [
+					"odometry"
 				]
 			},
 			{
