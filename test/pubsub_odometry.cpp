@@ -52,6 +52,9 @@ static std::thread work_loop;
 
 void ui_refresh() {
 
+	window.emplace(name_odo);
+	window->showWidget("Coord", cv::viz::WCoordinateSystem(1.));
+
 	while (true) {
 
 		if (widget_odo) {

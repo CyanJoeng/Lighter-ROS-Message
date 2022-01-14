@@ -1,2 +1,2 @@
 # CMG
-A lighter alternative to ROS messages
+A lighter massage porter with ROS-like API.

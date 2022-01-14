@@ -1,5 +1,0 @@
-- server 0.0.0.0
-= foo
-= bar
-- client 0.0.0.0
-

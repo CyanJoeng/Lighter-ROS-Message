@@ -142,24 +142,19 @@ int main(int argc, char *argv[]) {
 
 		std::string img_path = args["image"].as<std::string>();
 
-		cmg::init(2, proc_args, server_proc_name.c_str());
+		cmg::init(2, proc_args, proc.c_str());
 
 		cmg::NodeHandle n("~");
 
-		auto pub_image_foo = n.advertise<sensor_msgs::Image>("foo", 1000);
-		auto pub_image_bar = n.advertise<sensor_msgs::Image>("bar", 1000);
+		auto pub_image_topic = n.advertise<sensor_msgs::Image>(topic.c_str(), 1000);
 
 		for (auto i = 0; i >= 0; ++i) {
 
 			auto msg_image = draw_odo(img_path);
 
-			pub_image_foo.publish(msg_image);
-			printf("pub foo\n");
-			std::this_thread::sleep_for(std::chrono::duration<double>(.5));
-
-			pub_image_bar.publish(msg_image);
+			pub_image_topic.publish(msg_image);
 			printf("pub bar\n");
-			std::this_thread::sleep_for(std::chrono::duration<double>(.5));
+			std::this_thread::sleep_for(std::chrono::duration<double>(1.));
 		}
 
 		cmg::spin();

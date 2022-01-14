@@ -8,7 +8,6 @@
 
 #include "cmg/cmg.hpp"
 #include "messages/foo_bar.hpp"
-#include "messages/message.hpp"
 
 using namespace cmg;
 
