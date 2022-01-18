@@ -7,13 +7,20 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/matx.hpp>
 #include <opencv2/core/types.hpp>
+#include <opencv2/viz/types.hpp>
 #include <opencv2/viz/widgets.hpp>
 #include <string>
 #include <thread>
 
 #include <boost/program_options.hpp>
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
+#include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/viz.hpp>
 
@@ -35,18 +42,30 @@ auto create_odo(int id) -> cmg::nav_msgs::Odometry {
 	return {};
 }
 
-auto draw_odo_3d(const cmg::nav_msgs::OdometryConstPtr &odometry) -> WidgetPtr {
+auto draw_odo_3d(const cmg::nav_msgs::OdometryConstPtr &odometry) -> std::pair<WidgetPtr, cv::Affine3d> {
 
 	static std::vector<cv::Point3d> hist_points;
-	hist_points.emplace_back(odometry->pose.position.x, odometry->pose.position.y, odometry->pose.position.z);
+	auto &pos = odometry->pose.position;
+	auto &ori = odometry->pose.orientation;
+
+	hist_points.emplace_back(pos.x, pos.y, pos.z);
 
 	auto polyline = std::make_shared<Widget>(hist_points);
 
-	return polyline;
+	cv::Affine3d pose;
+	cv::Mat rot;
+	Eigen::Matrix3d m = Eigen::Quaterniond(ori.w, ori.x, ori.y, ori.z).matrix();
+	cv::eigen2cv(m, rot);
+
+	pose.rotation(rot);
+	pose.translation(cv::Vec3d(pos.x, pos.y, pos.z));
+
+	return {polyline, pose};
 }
 
 static std::optional<cv::viz::Viz3d> window;
 static WidgetPtr widget_odo;
+static cv::Affine3d cam_pose;
 static std::mutex widget_mt;
 static std::thread work_loop;
 
@@ -54,6 +73,9 @@ void ui_refresh() {
 
 	window.emplace(name_odo);
 	window->showWidget("Coord", cv::viz::WCoordinateSystem(1.));
+
+	cv::Matx33f K(700, 0, 320, 0, 700, 240, 0, 0);
+	window->showWidget("Cam", cv::viz::WCameraPosition(K,  1));
 
 	while (true) {
 
@@ -63,6 +85,7 @@ void ui_refresh() {
 				std::lock_guard<std::mutex> lock(widget_mt);
 
 				window->showWidget(name_odo, *widget_odo);
+				window->updateWidgetPose("Cam", cam_pose);
 			}
 			window->spinOnce();
 		}
@@ -79,10 +102,11 @@ auto cb(const cmg::nav_msgs::OdometryConstPtr &odometry) {
 	printf("cb odometry stamp %f (%10.4f %10.4f %10.4f)\n", odometry->header.stamp.toSec(),
 			position.x, position.y, position.z);
 
-	auto odo = draw_odo_3d(odometry);
+	auto [odo, pose] = draw_odo_3d(odometry);
 	{
 		std::lock_guard<std::mutex> lock(widget_mt);
 		widget_odo.swap(odo);
+		cam_pose = pose;
 	}
 }
 

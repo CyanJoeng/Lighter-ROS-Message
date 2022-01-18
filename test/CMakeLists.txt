@@ -1,5 +1,8 @@
 find_package(Boost REQUIRED program_options)
 find_package(OpenCV REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+include_directories(${EIGEN3_INCLUDE_DIRS})
 
 add_executable(pubsub_demo pubsub_demo.cpp)
 target_link_libraries(pubsub_demo cmg cmg_msgs
