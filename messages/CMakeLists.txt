@@ -10,7 +10,7 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 	)
 include_directories(${PROJECT_BINARY_DIR})
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
 	foo_bar.cpp
 	StampedFloat64Array.cpp
 	nav_msgs/Odometry.cpp
