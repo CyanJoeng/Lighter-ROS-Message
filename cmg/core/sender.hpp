@@ -53,7 +53,7 @@ namespace cmg {
 			try {
 
 				auto send_len = this->socket_->send(this->topic_, ss);
-				printf("SocketSender send msg_cipher_len %zu\n", send_len);
+				//printf("SocketSender send msg_cipher_len %zu\n", send_len);
 
 			} catch (const std::runtime_error &e) {
 

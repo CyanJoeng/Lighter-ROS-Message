@@ -53,8 +53,8 @@ namespace cmg {
 
 	auto Socket::send(const std::string &topic, const std::stringstream &ss) -> unsigned long {
 
-		auto subs = (uint32_t) nn_get_statistic (this->sid_, NN_STAT_CURRENT_CONNECTIONS);
-		printf("Socket %s clients %d\n", this->url_().c_str(), subs);
+		//auto subs = (uint32_t) nn_get_statistic (this->sid_, NN_STAT_CURRENT_CONNECTIONS);
+		//printf("Socket %s clients %d\n", this->url_().c_str(), subs);
 
 		auto str = ss.str();
 		auto ret = 0;
@@ -69,7 +69,7 @@ namespace cmg {
 			throw  std::runtime_error(error_str);
 		}
 
-		printf("Socket send: [%s] len %d\n", topic.c_str(), ret);
+		//printf("Socket send: [%s] len %d\n", topic.c_str(), ret);
 
 		return ret;
 	}
