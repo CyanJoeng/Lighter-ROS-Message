@@ -72,10 +72,10 @@ static std::thread work_loop;
 void ui_refresh() {
 
 	window.emplace(name_odo);
-	window->showWidget("Coord", cv::viz::WCoordinateSystem(1.));
+	window->showWidget("Coord", cv::viz::WCoordinateSystem(10.));
 
 	cv::Matx33f K(700, 0, 320, 0, 700, 240, 0, 0);
-	window->showWidget("Cam", cv::viz::WCameraPosition(K,  1));
+	auto cam = cv::viz::WCameraPosition(K,  10);
 
 	while (true) {
 
@@ -85,7 +85,7 @@ void ui_refresh() {
 				std::lock_guard<std::mutex> lock(widget_mt);
 
 				window->showWidget(name_odo, *widget_odo);
-				window->updateWidgetPose("Cam", cam_pose);
+				window->showWidget("Cam", cam, cam_pose);
 			}
 			window->spinOnce();
 		}
