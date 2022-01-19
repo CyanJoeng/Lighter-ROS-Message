@@ -3,7 +3,7 @@
 		"procs": [
 			{
 				"name": "data",
-				"ip": "172.18.135.110",
+				"ip": "172.18.135.33",
 				"topics": [
 					"image_raw",
 					"imu_raw",
@@ -11,6 +11,14 @@
 					"glo_ephem",
 					"meas",
 					"iono_params"
+				]
+			},
+			{
+				"name": "station",
+				"ip": "172.18.135.33",
+				"topics": [
+					"match",
+					"odometry"
 				]
 			},
 			{
@@ -26,14 +34,6 @@
 				"name": "estimator",
 				"ip": "0.0.0.0",
 				"topics": [
-					"odometry"
-				]
-			},
-			{
-				"name": "station",
-				"ip": "172.19.135.110",
-				"topics": [
-					"match",
 					"odometry"
 				]
 			}
