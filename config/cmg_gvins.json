@@ -15,7 +15,7 @@
 			},
 			{
 				"name": "station",
-				"ip": "172.19.135.33",
+				"ip": "172.18.135.33",
 				"topics": [
 					"match",
 					"odometry"
