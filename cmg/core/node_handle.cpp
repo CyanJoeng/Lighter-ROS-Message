@@ -16,7 +16,7 @@ namespace cmg {
 
 		if (!this->sender_) {
 
-			printf("Publisher publish: sender not set\n");
+			//printf("Publisher publish: sender not set\n");
 			return false;
 		}
 
