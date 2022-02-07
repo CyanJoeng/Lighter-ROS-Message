@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <mutex>
 #include <thread>
+#include <condition_variable>
 
 #include <boost/program_options.hpp>
 
@@ -43,23 +44,23 @@ auto draw_odo(const std::string &img_path) -> sensor_msgs::Image {
 
 static cv::Mat show_img;
 static std::mutex img_mt;
+static std::condition_variable img_cv;
 static std::thread work_loop;
 
 void ui_refresh() {
 
 	while (true) {
 
-		if (!show_img.empty()) {
+		{
+			std::unique_lock<std::mutex> lck(img_mt);
+			img_cv.wait(lck, []() {
+					return !show_img.empty();
+					});
 
-			{
-				std::lock_guard<std::mutex> lock(img_mt);
-
-				cv::imshow("callback", show_img);
-			}
-			cv::waitKey(10);
+			cv::imshow("callback", show_img);
 		}
 
-		std::this_thread::sleep_for(std::chrono::duration<double>(.1));
+		cv::waitKey(1);
 	}
 }
 
@@ -70,10 +71,11 @@ auto cb(const std::shared_ptr<const sensor_msgs::Image> &image) {
 	printf("cb image size (%d, %d) stamp %f\n", image->rows, image->cols, image->header.stamp.toSec());
 
 	{
-
 		std::lock_guard<std::mutex> lock(img_mt);
 		cv::Mat(image->rows, image->cols, CV_8UC(image->channels), (void*)image->data.data()).copyTo(show_img);
 	}
+	img_cv.notify_all();
+
 	if (save_img) {
 
 		char path[64];

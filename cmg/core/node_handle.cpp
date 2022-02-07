@@ -6,32 +6,33 @@
 
 #include <cstdio>
 #include <string>
+#include <utility>
 
 namespace cmg {
 
-	Publisher::NodePublisher(const std::shared_ptr<Sender> &sender)
-		: sender_(sender) {}
+	Publisher::NodePublisher(std::shared_ptr<Sender> sender)
+		: sender_(std::move(sender)) {}
 
 	auto Publisher::publish(const Message &msg) -> bool {
 
 		if (!this->sender_) {
 
-			//printf("Publisher publish: sender not set\n");
+			//CMG_DEBUG("Publisher publish: sender not set");
 			return false;
 		}
 
 		return this->sender_->send(msg);
 	}
 
-	Subscriber::NodeSubscriber(const std::shared_ptr<Receiver> &receiver)
-		: receiver_(receiver) {}
+	Subscriber::NodeSubscriber(std::shared_ptr<Receiver> receiver)
+		: receiver_(std::move(receiver)) {}
 
 
-	NodeHandle::NodeHandle(const std::string &proc_connect)
-		: proc_name_(proc_connect), config_(Environment::Config()) {};
+	NodeHandle::NodeHandle(const std::string& proc_connect_to)
+		: env_(Environment::Inst(proc_connect_to)), config_(Environment::Config()) {};
 
 	void NodeHandle::shutdown() {
 
-		Environment::Inst(this->proc_name_).Shutdown();
+		cmg::Environment::Shutdown();
 	}
 }

@@ -4,27 +4,34 @@
  */
 #pragma once
 
-#include <cstdio>
-#include <functional>
 #include <tuple>
 #include <vector>
 #include <map>
 #include <sstream>
+#include <functional>
+
 namespace cmg {
 
 	enum class LogType {
 
-		INFO=0, DEBUG, WARN, ERROR
+		DEBUG=0, INFO, WARN, ERROR
 	};
 
 	static std::map<LogType, std::string> LogStrOfType = {
-		{LogType::INFO, "Info"},
 		{LogType::DEBUG, "Debug"},
+		{LogType::INFO, "Info"},
 		{LogType::WARN, "Warn"},
 		{LogType::ERROR, "Error"}
 	};
 
+
 	class Log : public std::stringstream {
+
+		class OutFile;
+
+		static LogType level_;
+
+		static std::function<void (std::string)> printer_;
 
 		LogType type_;
 
@@ -36,14 +43,11 @@ namespace cmg {
 			this->str(inst.str());
 		}
 
-		~Log() {
-
-			printf("%s\n", this->str().c_str());
-		}
+		~Log();
 
 		auto operator() () -> Log& {
 
-			*this << "[CMG]" << LogStrOfType[type_] << " ";
+			*this << "[CMG](" << LogStrOfType[type_] << ") ";
 			return *this;
 		}
 
@@ -60,6 +64,15 @@ namespace cmg {
 			*this << buf;
 		}
 
+		static void setLevel(const LogType &tlevel);
+
+		static void setLevel(const std::string &level_str);
+
+		static void setOutFile(const std::string &path);
+
+		static void setPrinter(const std::function<void (const std::string&)> &printer, LogType level = Log::level_);
+
+
 		static auto Info() -> Log { return {LogType::INFO}; }
 
 		static auto Debug() -> Log { return {LogType::DEBUG}; }
@@ -70,10 +83,10 @@ namespace cmg {
 	};
 }
 
-#define CMG_INFO_STREAM cmg::Log::Info
-#define CMG_DEBUG_STREAM cmg::Log::Debug
-#define CMG_WARN_STREAM cmg::Log::Warn
-#define CMG_ERROR_STREAM cmg::Log::Error
+#define CMG_INFO_STREAM cmg::Log::Info()
+#define CMG_DEBUG_STREAM cmg::Log::Debug()
+#define CMG_WARN_STREAM cmg::Log::Warn()
+#define CMG_ERROR_STREAM cmg::Log::Error()
 
 
 #define CMG_INFO cmg::Log {cmg::LogType::INFO}

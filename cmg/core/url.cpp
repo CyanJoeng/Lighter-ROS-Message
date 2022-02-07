@@ -8,6 +8,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "cmg/utils/log.hpp"
+
 namespace cmg {
 
 	std::map<std::string, URL> URL::insts_;
@@ -38,7 +40,7 @@ namespace cmg {
 		new_inst.net_port_ = BASE_PORT + URL::insts_.size();
 		new_inst.tcp_url_ = URL::BuildUrl(address, new_inst.net_port_);
 
-		printf("[URL]regist /%s/%s -> %s\n", new_inst.proc_name_.c_str(), topic.c_str(), new_inst.tcp_url_.c_str());
+		CMG_INFO("[URL]regist /%s/%s -> %s", new_inst.proc_name_.c_str(), topic.c_str(), new_inst.tcp_url_.c_str());
 
 		return new_inst;
 	}
@@ -58,7 +60,11 @@ namespace cmg {
 		return this->proc_name_;
 	}
 
-	auto URL::port() const -> const unsigned {
+	auto URL::topic() const -> const std::string & {
+		return this->topic_;
+	}
+
+	auto URL::port() const -> unsigned {
 		return this->net_port_;
 	}
 
@@ -66,7 +72,7 @@ namespace cmg {
 		return this->tcp_url_;
 	}
 
-	auto URL::bindUrl() const -> const std::string {
+	auto URL::bindUrl() const -> std::string {
 
 		return URL::BuildUrl(URL::LOCAL_IP, this->net_port_);
 	}

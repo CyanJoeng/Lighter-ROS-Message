@@ -25,7 +25,7 @@ namespace cmg { namespace example_msgs {
 		std::string msg_data;
 		if (!msg.SerializeToString(&msg_data)) {
 
-			printf("FooBar serialize failed\n");
+			CMG_WARN("FooBar serialize failed");
 			return 0;
 		}
 
@@ -45,7 +45,7 @@ namespace cmg { namespace example_msgs {
 
 		if (!msg.ParsePartialFromString(msg_data)) {
 
-			printf("FooBar parse failed\n");
+			CMG_WARN("FooBar parse failed");
 			return 0;
 		}
 

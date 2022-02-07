@@ -31,16 +31,17 @@ int cmg::init_str(const std::vector<std::string> &args, const char *proc_name) {
 
 	if (args.size() < 2) {
 
-		printf("[cmg]init with 3 args(%zu): %s config_cmg.json\n", args.size(), args.front().c_str());
+		CMG_ERROR("[cmg]init with 2 args(%zu): %s config_cmg.json", args.size(), args.front().c_str());
 		return -1;
 	}
 
 	{
 		std::lock_guard<std::mutex> lck(init_mt);
-		if (inited) return -1;
+		if (!inited) {
 
-		Environment::Config(args[1]);
-		inited = true;
+			Environment::Config(args[1]);
+			inited = true;
+		}
 	}
 
 	Environment::Inst(proc_name);
@@ -51,4 +52,9 @@ int cmg::init_str(const std::vector<std::string> &args, const char *proc_name) {
 void cmg::spin() {
 
 	Environment::Spin();
+}
+
+void cmg::exit() {
+
+	Environment::Shutdown();
 }

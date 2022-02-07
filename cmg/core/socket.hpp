@@ -28,7 +28,7 @@ namespace cmg {
 
 		SsCallback msg_callback_;
 
-		std::thread reveiver_th_;
+		std::shared_ptr<std::thread> reveiver_th_;
 
 		std::mutex msg_send_mt_;
 

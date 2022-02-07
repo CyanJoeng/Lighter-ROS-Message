@@ -1,6 +1,7 @@
 project(cmg_proto_msg)
 
 find_package(Protobuf 3 REQUIRED)
+include_directories(${Protobuf_INCLUDE_DIRS})
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS 
 	example.proto

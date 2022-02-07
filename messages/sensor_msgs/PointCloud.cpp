@@ -35,7 +35,7 @@ namespace cmg { namespace sensor_msgs {
 		if (msg.SerializePartialToOstream(&out))
 			return msg.ByteSizeLong();
 		else
-			printf("PointCloud serialize failed\n");
+			CMG_WARN("PointCloud serialize failed\n");
 		return 0;
 	}
 
@@ -45,7 +45,7 @@ namespace cmg { namespace sensor_msgs {
 
 		if (!msg.ParseFromIstream(&in)) {
 
-			printf("PointCloud parse failed\n");
+			CMG_WARN("PointCloud parse failed\n");
 			return 0;
 		}
 

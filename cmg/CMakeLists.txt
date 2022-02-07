@@ -11,10 +11,11 @@ list(APPEND CMG_SRCS  # cmg logic
 
 	core/url.cpp
 	core/socket.cpp
-	core/enviroment.cpp
+        core/environment.cpp
 	core/node_handle.cpp
 
 	utils/config.cpp
+	utils/log.cpp
 
 	message/codex.cpp
 	)

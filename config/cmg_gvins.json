@@ -1,5 +1,9 @@
 {
 	"cmg": {
+		"log": {
+			"level": "Debug",
+			"file_name": ""
+		},
 		"procs": [
 			{
 				"name": "data",
@@ -39,5 +43,5 @@
 			}
 		]
 	},
-	"gvins_cfg": "./config/visensor_f9p/visensor_left_f9p_config.yaml"
+	"gvins_cfg": "visensor_left_f9p_config.yaml"
 }

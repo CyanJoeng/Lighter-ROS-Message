@@ -8,6 +8,8 @@
 #include <iostream>
 #include <string>
 
+#include "cmg/utils/log.hpp"
+
 namespace cmg {
 
 	class Message {
@@ -51,7 +53,7 @@ namespace cmg {
 
 			if (in.gcount() != len) {
 
-				printf("parse from in stream failed (%ld <- %td)\n", len, in.gcount());
+				CMG_WARN("parse from in stream failed (%ld <- %td)\n", len, in.gcount());
 			}
 
 			return len;

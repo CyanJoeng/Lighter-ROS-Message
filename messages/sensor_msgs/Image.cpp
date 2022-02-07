@@ -41,7 +41,7 @@ namespace cmg { namespace sensor_msgs{
 		
 		if (!msg.SerializeToString(&msg_data)) {
 
-			printf("Image serialize failed\n");
+			CMG_WARN("Image serialize failed\n");
 			return 0;
 		}
 
@@ -75,7 +75,7 @@ namespace cmg { namespace sensor_msgs{
 
 		if (!msg.ParseFromString(msg_data)) {
 
-			printf("Image parse failed\n");
+			CMG_WARN("Image parse failed\n");
 			return 0;
 		}
 

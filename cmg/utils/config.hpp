@@ -11,12 +11,16 @@
 
 #include <boost/json.hpp>
 
+#include "cmg/utils/log.hpp"
+
 
 namespace cmg {
 
 	class Config {
 
-		boost::json::value data_;
+		boost::json::object data_;
+
+		std::string root_dir_;
 
 	public:
 		Config(const std::string &file_path);
@@ -26,12 +30,11 @@ namespace cmg {
 
 			try {
 
-				auto it = this->data_.at(key);
-				val = boost::json::value_to<T>(it);
+				val = this->get<T>(key);
 				return true;
 			} catch (const boost::exception &e) {
 				
-				printf("[Config](get) can not find item with key %s\n", key.c_str());
+				CMG_WARN("[Config](get) can not find item with key %s", key.c_str());
 				return false;
 			}
 		}
@@ -49,7 +52,17 @@ namespace cmg {
 		template <typename T>
 		auto get(const std::string &key) const -> T {
 
+			if (key == "root_dir")
+				return this->root_dir_;
+
 			return boost::json::value_to<T>(this->data_.at(key));
+		}
+
+
+		template <typename T>
+		void set(const std::string &key, const T &val = nullptr) {
+
+			this->data_[key] = val;
 		}
 	};
 }

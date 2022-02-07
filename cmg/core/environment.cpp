@@ -2,7 +2,7 @@
  * Author: Cyan
  * Date: Fri Dec  3 12:09:21 CST 2021
  */
-#include "enviroment.hpp"
+#include "environment.hpp"
 
 #include <cstdio>
 #include <list>
@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <mutex>
 #include <condition_variable>
+#include <utility>
 
 
 namespace cmg {
@@ -22,10 +23,10 @@ namespace cmg {
 	std::shared_ptr<cmg::Config> Environment::config_ = nullptr;
 
 
-	Environment::Environment(const std::string &proc_name)
-		: proc_name_(proc_name) {}
+	Environment::Environment(std::string proc_name)
+		: proc_name_(std::move(proc_name)) {}
 
-	Environment::~Environment() {}
+	Environment::~Environment() = default;
 
 	auto Environment::Inst(const std::string &proc_name) -> Environment& {
 
@@ -45,7 +46,7 @@ namespace cmg {
 
 		std::lock_guard<std::mutex> lck(env_mt);
 
-		printf("[Environment][Inst] create env with proc_name %s\n", proc_name.c_str());
+		CMG_INFO("[Environment][Inst] create env with proc_name %s", proc_name.c_str());
 		Environment::env_insts_.push_back(Environment(proc_name));
 		env_cv.notify_all();
 
@@ -57,10 +58,23 @@ namespace cmg {
 		std::unique_lock<std::mutex> lck(env_mt);
 		env_cv.wait(lck, []() {
 
-				std::lock_guard<std::mutex> lck(env_mt);
-
 				return Environment::env_insts_.empty();
 			});
+	}
+
+	void Environment::Close(const Environment &env) {
+
+	    auto &envs = Environment::env_insts_;
+		auto it = std::find_if(envs.begin(), envs.end(), [&env](auto it) {
+			return it.proc_name_ == env.proc_name_;
+		});
+
+		if (it != envs.end())
+		{
+			std::lock_guard<std::mutex> lck(env_mt);
+			envs.erase(it);
+		}
+		env_cv.notify_all();
 	}
 
 	void Environment::Shutdown() {
@@ -80,14 +94,14 @@ namespace cmg {
 			return true;
 		} catch (const std::exception &e) {
 
-			printf("[Environment]Config Exception: %s\n", e.what());
-			printf("[Environment]Config config_file open failed: %s\n", config_file.c_str());
+			CMG_WARN("[Environment]Config Exception: %s", e.what());
+			CMG_WARN("[Environment]Config config_file open failed: %s", config_file.c_str());
 			Environment::config_ = nullptr;
 			return false;
 		}
 	}
 
-	auto Environment::Config() -> const cmg::Config& {
+	auto Environment::Config() -> cmg::Config& {
 
 		if (Environment::config_ == nullptr)
 			throw std::runtime_error("[Environment]Config config not be set correctly");

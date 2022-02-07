@@ -46,18 +46,18 @@ namespace cmg {
 
 			if (ss.str().length() != length) {
 
-				printf("stream len(%lu) != serialize len(%lu)\n", ss.str().length(), length);
+				CMG_WARN("stream len(%lu) != serialize len(%lu)", ss.str().length(), length);
 				return false;
 			}
 
 			try {
 
 				auto send_len = this->socket_->send(this->topic_, ss);
-				//printf("SocketSender send msg_cipher_len %zu\n", send_len);
+				//CMG_DEBUG("SocketSender send msg_cipher_len %zu", send_len);
 
 			} catch (const std::runtime_error &e) {
 
-				printf("SocketSender send error: %s\n", e.what());
+				CMG_WARN("SocketSender send error: %s", e.what());
 			}
 
 			return true;

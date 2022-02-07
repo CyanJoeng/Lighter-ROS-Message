@@ -42,11 +42,11 @@ namespace cmg {
 
 		auto topic() const -> const std::string&;
 
-		auto port() const -> const unsigned;
+		auto port() const -> unsigned;
 
 		auto operator() () const -> const std::string&;
 
-		auto bindUrl() const -> const std::string;
+		auto bindUrl() const -> std::string;
 
 	private:
 		std::string proc_name_;

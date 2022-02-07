@@ -8,6 +8,8 @@
 #include <map>
 #include <list>
 
+#include <boost/algorithm/string.hpp>
+
 #include "cmg/core/sender.hpp"
 #include "cmg/core/receiver.hpp"
 #include "cmg/core/socket.hpp"
@@ -42,9 +44,11 @@ namespace cmg {
 
 		static auto Config(const std::string &config_file) -> bool;
 
-		static auto Config() -> const cmg::Config&;
+		static auto Config() -> cmg::Config&;
 
 		static void Spin();
+
+		static void Close(const Environment &env);
 
 		static void Shutdown();
 
@@ -52,7 +56,7 @@ namespace cmg {
 		~Environment();
 
 	private:
-		Environment(const std::string &proc_name);
+		Environment(std::string proc_name);
 
 	private:
 		const std::string proc_name_;
@@ -77,11 +81,37 @@ namespace cmg {
 		}
 
 		template <typename Msg>
-		auto receiver(const std::string &topic, unsigned wait, const Receiver::Callback<Msg> &callback) -> std::shared_ptr<Receiver> {
+		auto receiver(const std::string &proc_name_topic, unsigned wait, const Receiver::Callback<Msg> &callback) -> std::shared_ptr<Receiver> {
+
+			CMG_INFO("[Environment] receiver proc_topic %s", proc_name_topic.c_str());
+
+			std::vector<std::string> strs;
+			boost::split(strs, proc_name_topic, boost::is_any_of("/"));
+
+			//std::string str = proc_name_topic;
+			//while (!str.empty()) {
+
+				//auto pos = str.find('/');
+				//if (pos != -1) {
+
+					//strs.push_back(str.substr(0, pos));
+					//str = str.substr(pos + 1);
+				//} else {
+
+					//strs.push_back(str);
+					//break;
+				//}
+			//}
+
+			auto &server_proc_name = strs[1];
+			auto &topic = strs.back();
+
+			CMG_INFO("[Environment] receiver %s connect to %s/%s",
+				this->proc_name_.c_str(), server_proc_name.c_str(), topic.c_str());
 
 			if (this->clients_.end() == this->clients_.find(topic)) {
 
-				auto client = Socket::Client(URL::Inst(this->proc_name_, topic));
+				auto client = Socket::Client(URL::Inst(server_proc_name, topic));
 				this->clients_.emplace(topic, client);
 			}
 

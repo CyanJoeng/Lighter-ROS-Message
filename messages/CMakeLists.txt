@@ -1,7 +1,7 @@
 project(cmg_msgs)
 find_package(Protobuf 3 REQUIRED)
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS 
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 	protos/example.proto
 	protos/geometry_msgs.proto
 	protos/nav_msgs.proto

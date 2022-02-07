@@ -14,6 +14,8 @@
 #include <nanomsg/nn.h>
 #include <nanomsg/pubsub.h>
 
+#include "cmg/utils/log.hpp"
+
 
 namespace cmg {
 
@@ -24,13 +26,14 @@ namespace cmg {
 		if (this->sid_ < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
-			fprintf(stderr, "socket open failed: (%s)\n", error_str);
+			CMG_ERROR("socket open failed: (%s)", error_str);
 			throw std::runtime_error(error_str);
 		}
 	};
 
 	Socket::~Socket() {
 
+		nn_close(this->sid_);
 		this->stopReceive();
 	}
 
@@ -43,10 +46,10 @@ namespace cmg {
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
-			fprintf(stderr, "socket bind failed: (bind to %s %s)\n", socket->url_().c_str(), error_str);
+			CMG_ERROR("socket bind failed: (bind to %s %s)", socket->url_().c_str(), error_str);
 			throw std::runtime_error(error_str);
 		}
-		printf("Socket bind: %s\n", bind_url.c_str());
+		CMG_INFO("[Socket](Server) bind: %s (%s)", bind_url.c_str(), socket->url_.topic().c_str());
 
 		return socket;
 	}
@@ -54,7 +57,7 @@ namespace cmg {
 	auto Socket::send(const std::string &topic, const std::stringstream &ss) -> unsigned long {
 
 		//auto subs = (uint32_t) nn_get_statistic (this->sid_, NN_STAT_CURRENT_CONNECTIONS);
-		//printf("Socket %s clients %d\n", this->url_().c_str(), subs);
+		//CMG_DEBUG("Socket %s clients %d", this->url_().c_str(), subs);
 
 		auto str = ss.str();
 		auto ret = 0;
@@ -65,11 +68,11 @@ namespace cmg {
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
-			fprintf(stderr, "socket send failed (%s)\n", error_str);
+			CMG_ERROR("socket send failed (%s)", error_str);
 			throw  std::runtime_error(error_str);
 		}
 
-		//printf("Socket send: [%s] len %d\n", topic.c_str(), ret);
+		//CMG_DEBUG("Socket send: [%s] len %d", topic.c_str(), ret);
 
 		return ret;
 	}
@@ -82,10 +85,10 @@ namespace cmg {
 		if (ret < 0) {
 
 			auto error_str = nn_strerror(nn_errno());
-			fprintf(stderr, "socket connect failed (%s)\n", error_str);
+			CMG_ERROR("socket connect failed (%s)", error_str);
 			throw std::runtime_error(error_str);
 		}
-		printf("Socket connect: %s\n", socket->url_().c_str());
+		CMG_INFO("[Socket](Client) connect: %s", socket->url_().c_str());
 
 		return socket;
 	}
@@ -93,9 +96,11 @@ namespace cmg {
 	auto Socket::stopReceive() -> bool {
 
 		this->exit_receive_ = true;
-		if (this->reveiver_th_.joinable()) {
+		if (this->reveiver_th_ && this->reveiver_th_->joinable()) {
 
-			this->reveiver_th_.join();
+			int timeout = 1;
+			nn_setsockopt(this->sid_, NN_SUB, NN_RCVTIMEO, &timeout, sizeof(int));
+			this->reveiver_th_->join();
 		}
 		this->exit_receive_ = false;
 
@@ -106,17 +111,17 @@ namespace cmg {
 
 		this->msg_callback_ = callback;
 
-		std::string use_topic = "";
+		std::string use_topic;
 
 		{
 			auto ret = nn_setsockopt(this->sid_, NN_SUB, NN_SUB_SUBSCRIBE, use_topic.c_str(), use_topic.length());
 			if (ret < 0) {
 
 				auto error_str = nn_strerror(nn_errno());
-				fprintf(stderr, "socket set topic failed (%s)\n", error_str);
+				CMG_ERROR("socket set topic failed (%s)", error_str);
 				throw std::runtime_error(error_str);
 			}
-			printf("Socket client set topic: %s\n", topic.data());
+			CMG_INFO("[Socket](startReceive) client set topic: %s", topic.data());
 		}
 		{
 			int recv_max_size = -1;
@@ -124,15 +129,26 @@ namespace cmg {
 			if (ret < 0) {
 
 				auto error_str = nn_strerror(nn_errno());
-				fprintf(stderr, "socket set recv max size failed (%s)\n", error_str);
+				CMG_ERROR("socket set recv max size failed (%s)", error_str);
 				throw std::runtime_error(error_str);
 			}
-			printf("Socket client set recv max size: %d\n", recv_max_size);
+			CMG_INFO("[Socket](startReceive) client set recv max size: %d", recv_max_size);
 		}
 
 		auto receive_job = [this, use_topic]() {
 
-			while (!this->exit_receive_) {
+			if (this->exit_receive_) {
+
+			    printf("start with exit\n");
+			}
+
+			while (true) {
+
+				if (this->exit_receive_) {
+
+					printf("exit with condi\n");
+					break;
+				}
 
 				void *buf = nullptr;
 				auto len = nn_recv(this->sid_, &buf, NN_MSG, 0);
@@ -141,12 +157,12 @@ namespace cmg {
 
 					auto recv_topic = std::string((char*)buf);
 					recv_topic = recv_topic.substr(0, recv_topic.find('\n'));
-					printf("Receiver receive len %d topic %s\n", len, recv_topic.c_str());
+					CMG_INFO("[Socket](receive_job) receive len %d topic %s", len, recv_topic.c_str());
 				}
 				if (len < 0) {
 
 					auto error_str = nn_strerror(nn_errno());
-					fprintf(stderr, "socket receive failed (%s)\n", error_str);
+					CMG_ERROR("[Socket](receive_job) receive failed (%s)", error_str);
 					continue;
 				}
 
@@ -157,7 +173,7 @@ namespace cmg {
 					auto code = ntohl(*reinterpret_cast<const uint32_t*>(msg));
 					if (code == Socket::CODE_EXIT) {
 
-						printf("Receiver receive exit code %d\n", code);
+						CMG_INFO("[Socket](receive_job) receive exit code %d", code);
 						break;
 					}
 				}
@@ -169,11 +185,11 @@ namespace cmg {
 				nn_freemsg(buf);
 			}
 
-			printf("Receiver exit\n");
+			CMG_INFO("[Socket](receive_job) exit");
 		};
 
 		this->stopReceive();
-		this->reveiver_th_ = std::thread(receive_job);
+		this->reveiver_th_ = std::make_shared<std::thread>(receive_job);
 
 		return true;
 	}

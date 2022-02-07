@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 find_package(nanomsg REQUIRED)
-find_package(Boost 1.75.0 COMPONENTS iostreams
+find_package(Boost 1.75.0 COMPONENTS iostreams filesystem
 	HINTS ${Boost_DIR})
 
 if (NOT Boost_FOUND)
@@ -28,6 +28,9 @@ include_directories(
 
 add_subdirectory(cmg)
 add_subdirectory(messages)
+
+set(CMG_LIBS cmg cmg_msgs CACHE STRING "cmg librarys")
+set(CMG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} CACHE STRING "cmg includes")
 
 if (${CMG_BUILD_APPS})
 	add_subdirectory(test)

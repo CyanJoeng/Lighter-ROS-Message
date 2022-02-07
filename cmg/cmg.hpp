@@ -17,4 +17,6 @@ namespace cmg {
 	int init_str(const std::vector<std::string> &args, const char *proc_name);
 
 	void spin();
-};
+
+	void exit();
+}

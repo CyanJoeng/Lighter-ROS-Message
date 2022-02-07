@@ -66,7 +66,9 @@ auto draw_odo_3d(const cmg::nav_msgs::OdometryConstPtr &odometry) -> std::pair<W
 static std::optional<cv::viz::Viz3d> window;
 static WidgetPtr widget_odo;
 static cv::Affine3d cam_pose;
+
 static std::mutex widget_mt;
+static std::condition_variable widget_cv;
 static std::thread work_loop;
 
 void ui_refresh() {
@@ -79,18 +81,17 @@ void ui_refresh() {
 
 	while (true) {
 
-		if (widget_odo) {
+		{
+			std::unique_lock<std::mutex> lck(widget_mt);
+			widget_cv.wait(lck, []() {
+					return widget_odo;
+					});
 
-			{
-				std::lock_guard<std::mutex> lock(widget_mt);
-
-				window->showWidget(name_odo, *widget_odo);
-				window->showWidget("Cam", cam, cam_pose);
-			}
-			window->spinOnce();
+			window->showWidget(name_odo, *widget_odo);
+			window->showWidget("Cam", cam, cam_pose);
 		}
 
-		std::this_thread::sleep_for(std::chrono::duration<double>(.1));
+		window->spinOnce();
 	}
 }
 
@@ -108,6 +109,7 @@ auto cb(const cmg::nav_msgs::OdometryConstPtr &odometry) {
 		widget_odo.swap(odo);
 		cam_pose = pose;
 	}
+	widget_cv.notify_all();
 }
 
 auto args_parser(int argc, char *argv[]) -> po::variables_map {
