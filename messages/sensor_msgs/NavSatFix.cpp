@@ -8,7 +8,6 @@
 #include "cmg/message/codex.hpp"
 #include "sensor_msgs.pb.h"
 
-
 namespace cmg { namespace sensor_msgs {
 
 	auto NavSatFix::serialize(std::ostream &out) const -> unsigned long {

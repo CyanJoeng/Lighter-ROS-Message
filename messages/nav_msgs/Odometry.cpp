@@ -9,7 +9,6 @@
 #include "cmg/message/codex.hpp"
 #include "nav_msgs.pb.h"
 
-
 namespace cmg { namespace nav_msgs {
 
 	auto Odometry::serialize(std::ostream &out) const -> unsigned long {

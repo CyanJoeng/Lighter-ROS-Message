@@ -8,7 +8,6 @@
 #include "cmg/message/codex.hpp"
 #include "std_msgs.pb.h"
 
-
 namespace cmg {
 
 	auto StampedFloat64Array::serialize(std::ostream &out) const -> unsigned long {

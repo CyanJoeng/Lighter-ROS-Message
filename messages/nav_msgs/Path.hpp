@@ -6,5 +6,5 @@
 
 namespace cmg { namespace nav_msgs {
 
-	struct Path {};
+    struct Path {};
 }}

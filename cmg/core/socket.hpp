@@ -14,11 +14,11 @@
 
 namespace cmg {
 
-	class Socket {
+    class Socket {
 
-		static constexpr auto CODE_EXIT = 4399;
+        static constexpr auto CODE_EXIT = 4399;
 
-	public:
+    public:
 		using SsCallback = std::function<void (std::stringstream &)>;
 		
 	private:

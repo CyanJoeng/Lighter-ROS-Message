@@ -41,9 +41,13 @@ namespace cmg {
 				{"client", "0.0.0.0", {}}
 			};
 
-			for (auto [proc_name, ip, topics] : cfg)
-				for (auto &topic : topics)
+			for (auto [proc_name, ip, topics] : cfg) {
+
+				for (auto &topic : topics) {
+
 					cmg::URL::RegistProc(proc_name, topic, ip);
+                }
+            }
 
 
 			return true;

@@ -28,8 +28,9 @@ namespace cmg { namespace sensor_msgs {
 		for (auto ch : this->channels) {
 
 			auto channel = msg.add_channels();
-			for (auto val : ch.values)
+			for (auto val : ch.values) {
 				channel->add_vals(val);
+            }
 		}
 
 		if (msg.SerializePartialToOstream(&out))

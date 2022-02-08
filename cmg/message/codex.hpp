@@ -8,7 +8,7 @@
 
 namespace cmg {
 
-	struct Codex {
+    struct Codex {
 
 		static auto encode64(const std::string &plaint) -> std::string;
 

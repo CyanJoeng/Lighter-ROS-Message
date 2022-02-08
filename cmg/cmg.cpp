@@ -21,8 +21,9 @@ int cmg::init(int argc, const char * const argv[], const char *proc_name) {
 
 	std::vector<std::string> args;
 	args.reserve(argc);
-	for (auto i = 0; i < argc; ++i)
+	for (auto i = 0; i < argc; ++i) {
 		args.emplace_back(argv[i]);
+    }
 
 	return cmg::init_str(args, proc_name);
 }
