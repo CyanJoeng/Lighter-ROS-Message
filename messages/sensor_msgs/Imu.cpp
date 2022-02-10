@@ -11,63 +11,65 @@
 
 namespace cmg { namespace sensor_msgs {
 
-	auto Imu::serialize(std::ostream &out) const -> unsigned long {
+    auto Imu::serialize(std::ostream &out) const -> unsigned long {
 
-		cmg_pb::Imu msg;
+        cmg_pb::Imu msg;
 
-		auto header = msg.mutable_header();
-		header->set_stamp_sec(this->header.stamp.toSec());
-		header->set_frame_id(this->header.frame_id);
+        auto header = msg.mutable_header();
+        header->set_stamp_sec(this->header.stamp.sec);
+        header->set_stamp_nsec(this->header.stamp.nsec);
+        header->set_frame_id(this->header.frame_id);
 
-		auto _linear = msg.mutable_linear_acceleration();
-		_linear->set_x(this->linear_acceleration.x);
-		_linear->set_y(this->linear_acceleration.y);
-		_linear->set_z(this->linear_acceleration.z);
+        auto _linear = msg.mutable_linear_acceleration();
+        _linear->set_x(this->linear_acceleration.x);
+        _linear->set_y(this->linear_acceleration.y);
+        _linear->set_z(this->linear_acceleration.z);
 
-		auto _angular = msg.mutable_angular_velocity();
-		_angular->set_x(this->angular_velocity.x);
-		_angular->set_y(this->angular_velocity.y);
-		_angular->set_z(this->angular_velocity.z);
+        auto _angular = msg.mutable_angular_velocity();
+        _angular->set_x(this->angular_velocity.x);
+        _angular->set_y(this->angular_velocity.y);
+        _angular->set_z(this->angular_velocity.z);
 
-		std::string msg_data;
-		
-		if (!msg.SerializeToString(&msg_data)) {
+        std::string msg_data;
 
-			CMG_WARN("Image serialize failed\n");
-			return 0;
-		}
+        if (!msg.SerializeToString(&msg_data)) {
 
-		msg_data = Codex::encode64(msg_data);
-		out.write(msg_data.data(), msg_data.length());
+            CMG_WARN("Image serialize failed\n");
+            return 0;
+        }
 
-		return msg_data.length();
-	}
+        msg_data = Codex::encode64(msg_data);
+        out.write(msg_data.data(), msg_data.length());
 
-	auto Imu::parse(std::istream &in) -> unsigned long {
+        return msg_data.length();
+    }
 
-		cmg_pb::Imu msg;
-		
-		std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
+    auto Imu::parse(std::istream &in) -> unsigned long {
 
-		std::string msg_data = ss.str();
-		msg_data = Codex::decode64(msg_data);
+        cmg_pb::Imu msg;
 
-		if (!msg.ParseFromString(msg_data)) {
+        std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
 
-			CMG_WARN("Image parse failed\n");
-			return 0;
-		}
+        std::string msg_data = ss.str();
+        msg_data = Codex::decode64(msg_data);
 
-		this->header.stamp.time_ = msg.header().stamp_sec();
-		this->header.frame_id = msg.header().frame_id();
+        if (!msg.ParseFromString(msg_data)) {
 
-		this->linear_acceleration.x = msg.linear_acceleration().x();
-		this->linear_acceleration.y = msg.linear_acceleration().y();
-		this->linear_acceleration.z = msg.linear_acceleration().z();
-		this->angular_velocity.x = msg.angular_velocity().x();
-		this->angular_velocity.y = msg.angular_velocity().y();
-		this->angular_velocity.z = msg.angular_velocity().z();
+            CMG_WARN("Image parse failed\n");
+            return 0;
+        }
 
-		return msg_data.length();
-	}
+        this->header.stamp.sec = msg.header().stamp_sec();
+        this->header.stamp.nsec = msg.header().stamp_nsec();
+        this->header.frame_id = msg.header().frame_id();
+
+        this->linear_acceleration.x = msg.linear_acceleration().x();
+        this->linear_acceleration.y = msg.linear_acceleration().y();
+        this->linear_acceleration.z = msg.linear_acceleration().z();
+        this->angular_velocity.x = msg.angular_velocity().x();
+        this->angular_velocity.y = msg.angular_velocity().y();
+        this->angular_velocity.z = msg.angular_velocity().z();
+
+        return msg_data.length();
+    }
 }}

@@ -9,73 +9,75 @@
 
 namespace cmg { namespace sensor_msgs {
 
-	auto PointCloud::serialize(std::ostream &out) const -> unsigned long {
+    auto PointCloud::serialize(std::ostream &out) const -> unsigned long {
 
-		cmg_pb::PointCloud msg;
+        cmg_pb::PointCloud msg;
 
-		auto header = msg.mutable_header();
-		header->set_stamp_sec(this->header.stamp.toSec());
-		header->set_frame_id(this->header.frame_id);
+        auto header = msg.mutable_header();
+        header->set_stamp_sec(this->header.stamp.sec);
+        header->set_stamp_nsec(this->header.stamp.nsec);
+        header->set_frame_id(this->header.frame_id);
 
-		for (auto &pt : this->points) {
+        for (auto &pt : this->points) {
 
-			auto point = msg.add_points();
-			point->set_x(pt.x);
-			point->set_y(pt.y);
-			point->set_z(pt.z);
-		}
+            auto point = msg.add_points();
+            point->set_x(pt.x);
+            point->set_y(pt.y);
+            point->set_z(pt.z);
+        }
 
-		for (auto ch : this->channels) {
+        for (auto ch : this->channels) {
 
-			auto channel = msg.add_channels();
-			for (auto val : ch.values) {
-				channel->add_vals(val);
+            auto channel = msg.add_channels();
+            for (auto val : ch.values) {
+                channel->add_vals(val);
             }
-		}
+        }
 
-		if (msg.SerializePartialToOstream(&out))
-			return msg.ByteSizeLong();
-		else
-			CMG_WARN("PointCloud serialize failed\n");
-		return 0;
-	}
+        if (msg.SerializePartialToOstream(&out))
+            return msg.ByteSizeLong();
+        else
+            CMG_WARN("PointCloud serialize failed\n");
+        return 0;
+    }
 
-	auto PointCloud::parse(std::istream &in) -> unsigned long {
+    auto PointCloud::parse(std::istream &in) -> unsigned long {
 
-		cmg_pb::PointCloud msg;
+        cmg_pb::PointCloud msg;
 
-		if (!msg.ParseFromIstream(&in)) {
+        if (!msg.ParseFromIstream(&in)) {
 
-			CMG_WARN("PointCloud parse failed\n");
-			return 0;
-		}
+            CMG_WARN("PointCloud parse failed\n");
+            return 0;
+        }
 
-		this->header.stamp.time_ = msg.header().stamp_sec();
-		this->header.frame_id = msg.header().frame_id();
+        this->header.stamp.sec = msg.header().stamp_sec();
+        this->header.stamp.nsec = msg.header().stamp_nsec();
+        this->header.frame_id = msg.header().frame_id();
 
-		this->points.reserve(msg.points_size());
-		for (auto &pt : msg.points()) {
+        this->points.reserve(msg.points_size());
+        for (auto &pt : msg.points()) {
 
-			geometry_msgs::Point32 p;
-			p.x = pt.x();
-			p.y = pt.y();
-			p.z = pt.z();
-			this->points.push_back(p);
-		}
+            geometry_msgs::Point32 p;
+            p.x = pt.x();
+            p.y = pt.y();
+            p.z = pt.z();
+            this->points.push_back(p);
+        }
 
-		this->channels.reserve(msg.channels_size());
-		for (auto &ch : msg.channels()) {
+        this->channels.reserve(msg.channels_size());
+        for (auto &ch : msg.channels()) {
 
-			ChannelFloat32 channel;
-			channel.values.reserve(ch.vals_size());
-			for (auto val : ch.vals()) {
+            ChannelFloat32 channel;
+            channel.values.reserve(ch.vals_size());
+            for (auto val : ch.vals()) {
 
-				channel.values.push_back(val);
-			}
+                channel.values.push_back(val);
+            }
 
-			this->channels.push_back(channel);
-		}
+            this->channels.push_back(channel);
+        }
 
-		return msg.ByteSizeLong();
-	}
+        return msg.ByteSizeLong();
+    }
 }}

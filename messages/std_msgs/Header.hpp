@@ -8,26 +8,34 @@
 
 namespace cmg { namespace std_msgs {
 
-	struct Header {
+    struct Header {
 
-		struct {
-			
-			double time_{0.0};
+        struct {
 
-			auto toSec() const -> double { return this->time_; }
+            uint64_t sec{0};
 
-			double operator= (const double t) {
+            uint64_t nsec{0};
 
-				return this->time_ = t;
-			}
-		} stamp;
+            auto toSec() const -> double { 
 
-		std::string frame_id{""};
-	};
+                return this->sec * 1.0 + this->nsec * 1e-9; 
+            }
+
+            double operator= (const double t) {
+
+                this->sec = t;
+                this->nsec = uint64_t(t * 1e6) % 1000000 * 1000;
+
+                return t;
+            }
+        } stamp;
+
+        std::string frame_id{""};
+    };
 
 
-	struct Point3 {
+    struct Point3 {
 
-		double x, y, z;
-	};
+        double x, y, z;
+    };
 }}

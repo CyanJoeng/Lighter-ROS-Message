@@ -4,8 +4,10 @@ package cmg_pb;
 
 message Header {
 
-	double stamp_sec = 1;
-	string frame_id = 2;
+	uint64 stamp_sec = 1;
+	uint64 stamp_nsec = 2;
+
+	string frame_id = 3;
 }
 
 message StampedFloat64Array {

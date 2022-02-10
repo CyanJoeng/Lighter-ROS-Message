@@ -11,75 +11,77 @@
 
 namespace cmg { namespace nav_msgs {
 
-	auto Odometry::serialize(std::ostream &out) const -> unsigned long {
+    auto Odometry::serialize(std::ostream &out) const -> unsigned long {
 
-		cmg_pb::Odometry msg;
+        cmg_pb::Odometry msg;
 
-		auto header = msg.mutable_header();
-		header->set_stamp_sec(this->header.stamp.toSec());
-		header->set_frame_id(this->header.frame_id);
+        auto header = msg.mutable_header();
+        header->set_stamp_sec(this->header.stamp.sec);
+        header->set_stamp_nsec(this->header.stamp.nsec);
+        header->set_frame_id(this->header.frame_id);
 
-		auto pose = msg.mutable_pose();
-		auto position = pose->mutable_position();
-		position->set_x(this->pose.position.x);
-		position->set_y(this->pose.position.y);
-		position->set_z(this->pose.position.z);
-		auto orientation = pose->mutable_orientation();
-		orientation->set_x(this->pose.orientation.x);
-		orientation->set_y(this->pose.orientation.y);
-		orientation->set_z(this->pose.orientation.z);
-		orientation->set_w(this->pose.orientation.w);
+        auto pose = msg.mutable_pose();
+        auto position = pose->mutable_position();
+        position->set_x(this->pose.position.x);
+        position->set_y(this->pose.position.y);
+        position->set_z(this->pose.position.z);
+        auto orientation = pose->mutable_orientation();
+        orientation->set_x(this->pose.orientation.x);
+        orientation->set_y(this->pose.orientation.y);
+        orientation->set_z(this->pose.orientation.z);
+        orientation->set_w(this->pose.orientation.w);
 
-		auto twist_linear = msg.mutable_twist()->mutable_linear();
-		twist_linear->set_x(this->twist.x);
-		twist_linear->set_y(this->twist.y);
-		twist_linear->set_z(this->twist.z);
+        auto twist_linear = msg.mutable_twist()->mutable_linear();
+        twist_linear->set_x(this->twist.x);
+        twist_linear->set_y(this->twist.y);
+        twist_linear->set_z(this->twist.z);
 
-		std::string msg_data;
-		
-		if (!msg.SerializeToString(&msg_data)) {
+        std::string msg_data;
 
-			CMG_WARN("Image serialize failed\n");
-			return 0;
-		}
+        if (!msg.SerializeToString(&msg_data)) {
 
-		msg_data = Codex::encode64(msg_data);
-		out.write(msg_data.data(), msg_data.length());
+            CMG_WARN("Image serialize failed\n");
+            return 0;
+        }
 
-		return msg_data.length();
-	}
+        msg_data = Codex::encode64(msg_data);
+        out.write(msg_data.data(), msg_data.length());
 
-	auto Odometry::parse(std::istream &in) -> unsigned long {
+        return msg_data.length();
+    }
 
-		cmg_pb::Odometry msg;
-		
-		std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
+    auto Odometry::parse(std::istream &in) -> unsigned long {
 
-		std::string msg_data = ss.str();
-		msg_data = Codex::decode64(msg_data);
+        cmg_pb::Odometry msg;
 
-		if (!msg.ParseFromString(msg_data)) {
+        std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
 
-			CMG_WARN("Image parse failed\n");
-			return 0;
-		}
+        std::string msg_data = ss.str();
+        msg_data = Codex::decode64(msg_data);
 
-		this->header.stamp.time_ = msg.header().stamp_sec();
-		this->header.frame_id = msg.header().frame_id();
+        if (!msg.ParseFromString(msg_data)) {
 
-		this->pose.position.x = msg.pose().position().x();
-		this->pose.position.y = msg.pose().position().y();
-		this->pose.position.z = msg.pose().position().z();
-		this->pose.orientation.x = msg.pose().orientation().x();
-		this->pose.orientation.y = msg.pose().orientation().y();
-		this->pose.orientation.z = msg.pose().orientation().z();
-		this->pose.orientation.w = msg.pose().orientation().w();
+            CMG_WARN("Image parse failed\n");
+            return 0;
+        }
 
-		this->twist.x = msg.twist().linear().x();
-		this->twist.y = msg.twist().linear().y();
-		this->twist.z = msg.twist().linear().z();
+        this->header.stamp.sec = msg.header().stamp_sec();
+        this->header.stamp.nsec = msg.header().stamp_nsec();
+        this->header.frame_id = msg.header().frame_id();
 
-		return msg_data.length();
-	}
+        this->pose.position.x = msg.pose().position().x();
+        this->pose.position.y = msg.pose().position().y();
+        this->pose.position.z = msg.pose().position().z();
+        this->pose.orientation.x = msg.pose().orientation().x();
+        this->pose.orientation.y = msg.pose().orientation().y();
+        this->pose.orientation.z = msg.pose().orientation().z();
+        this->pose.orientation.w = msg.pose().orientation().w();
+
+        this->twist.x = msg.twist().linear().x();
+        this->twist.y = msg.twist().linear().y();
+        this->twist.z = msg.twist().linear().z();
+
+        return msg_data.length();
+    }
 
 }}

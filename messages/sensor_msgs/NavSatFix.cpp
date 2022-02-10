@@ -10,55 +10,57 @@
 
 namespace cmg { namespace sensor_msgs {
 
-	auto NavSatFix::serialize(std::ostream &out) const -> unsigned long {
+    auto NavSatFix::serialize(std::ostream &out) const -> unsigned long {
 
-		cmg_pb::NavSatFix msg;
+        cmg_pb::NavSatFix msg;
 
-		auto header = msg.mutable_header();
-		header->set_stamp_sec(this->header.stamp.toSec());
-		header->set_frame_id(this->header.frame_id);
+        auto header = msg.mutable_header();
+        header->set_stamp_sec(this->header.stamp.sec);
+        header->set_stamp_nsec(this->header.stamp.nsec);
+        header->set_frame_id(this->header.frame_id);
 
-		msg.set_latitude(this->latitude);
-		msg.set_longitude(this->longitude);
-		msg.set_altitude(this->altitude);
+        msg.set_latitude(this->latitude);
+        msg.set_longitude(this->longitude);
+        msg.set_altitude(this->altitude);
 
-		std::string msg_data;
-		
-		if (!msg.SerializeToString(&msg_data)) {
+        std::string msg_data;
 
-			CMG_WARN("Image serialize failed\n");
-			return 0;
-		}
+        if (!msg.SerializeToString(&msg_data)) {
 
-		msg_data = Codex::encode64(msg_data);
-		out.write(msg_data.data(), msg_data.length());
+            CMG_WARN("Image serialize failed\n");
+            return 0;
+        }
 
-		return msg_data.length();
+        msg_data = Codex::encode64(msg_data);
+        out.write(msg_data.data(), msg_data.length());
 
-	}
+        return msg_data.length();
 
-	auto NavSatFix::parse(std::istream &in) -> unsigned long {
+    }
 
-		cmg_pb::NavSatFix msg;
-		
-		std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
+    auto NavSatFix::parse(std::istream &in) -> unsigned long {
 
-		std::string msg_data = ss.str();
-		msg_data = Codex::decode64(msg_data);
+        cmg_pb::NavSatFix msg;
 
-		if (!msg.ParseFromString(msg_data)) {
+        std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
 
-			CMG_WARN("Image parse failed\n");
-			return 0;
-		}
+        std::string msg_data = ss.str();
+        msg_data = Codex::decode64(msg_data);
 
-		this->header.stamp.time_ = msg.header().stamp_sec();
-		this->header.frame_id = msg.header().frame_id();
+        if (!msg.ParseFromString(msg_data)) {
 
-		this->latitude = msg.latitude();
-		this->longitude = msg.longitude();
-		this->altitude = msg.altitude();
+            CMG_WARN("Image parse failed\n");
+            return 0;
+        }
 
-		return msg_data.length();
-	}
+        this->header.stamp.sec = msg.header().stamp_sec();
+        this->header.stamp.nsec = msg.header().stamp_nsec();
+        this->header.frame_id = msg.header().frame_id();
+
+        this->latitude = msg.latitude();
+        this->longitude = msg.longitude();
+        this->altitude = msg.altitude();
+
+        return msg_data.length();
+    }
 }}

@@ -10,52 +10,54 @@
 
 namespace cmg {
 
-	auto StampedFloat64Array::serialize(std::ostream &out) const -> unsigned long {
+    auto StampedFloat64Array::serialize(std::ostream &out) const -> unsigned long {
 
-		cmg_pb::StampedFloat64Array msg;
+        cmg_pb::StampedFloat64Array msg;
 
-		auto header = msg.mutable_header();
-		header->set_stamp_sec(this->header.stamp.toSec());
-		header->set_frame_id(this->header.frame_id);
+        auto header = msg.mutable_header();
+        header->set_stamp_sec(this->header.stamp.sec);
+        header->set_stamp_nsec(this->header.stamp.nsec);
+        header->set_frame_id(this->header.frame_id);
 
-		auto data_ = msg.mutable_data();
-		data_->Add(this->data.begin(), this->data.end());
+        auto data_ = msg.mutable_data();
+        data_->Add(this->data.begin(), this->data.end());
 
-		std::string msg_data;
-		
-		if (!msg.SerializeToString(&msg_data)) {
+        std::string msg_data;
 
-			CMG_WARN("Image serialize failed\n");
-			return 0;
-		}
+        if (!msg.SerializeToString(&msg_data)) {
 
-		msg_data = Codex::encode64(msg_data);
-		out.write(msg_data.data(), msg_data.length());
+            CMG_WARN("Image serialize failed\n");
+            return 0;
+        }
 
-		return msg_data.length();
-	}
+        msg_data = Codex::encode64(msg_data);
+        out.write(msg_data.data(), msg_data.length());
 
-	auto StampedFloat64Array::parse(std::istream &in) -> unsigned long {
+        return msg_data.length();
+    }
 
-		cmg_pb::StampedFloat64Array msg;
-		
-		std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
+    auto StampedFloat64Array::parse(std::istream &in) -> unsigned long {
 
-		std::string msg_data = ss.str();
-		msg_data = Codex::decode64(msg_data);
+        cmg_pb::StampedFloat64Array msg;
 
-		if (!msg.ParseFromString(msg_data)) {
+        std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
 
-			CMG_WARN("Image parse failed\n");
-			return 0;
-		}
+        std::string msg_data = ss.str();
+        msg_data = Codex::decode64(msg_data);
 
-		this->header.stamp.time_ = msg.header().stamp_sec();
-		this->header.frame_id = msg.header().frame_id();
+        if (!msg.ParseFromString(msg_data)) {
 
-		this->data.resize(msg.data_size());
-		std::copy(msg.data().begin(), msg.data().end(), this->data.begin());
+            CMG_WARN("Image parse failed\n");
+            return 0;
+        }
 
-		return msg_data.length();
-	}
+        this->header.stamp.sec = msg.header().stamp_sec();
+        this->header.stamp.nsec = msg.header().stamp_nsec();
+        this->header.frame_id = msg.header().frame_id();
+
+        this->data.resize(msg.data_size());
+        std::copy(msg.data().begin(), msg.data().end(), this->data.begin());
+
+        return msg_data.length();
+    }
 }

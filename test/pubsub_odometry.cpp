@@ -7,21 +7,17 @@
 #include <list>
 #include <memory>
 #include <mutex>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/matx.hpp>
-#include <opencv2/core/types.hpp>
-#include <opencv2/viz/types.hpp>
-#include <opencv2/viz/widgets.hpp>
 #include <string>
 #include <thread>
+#include <condition_variable>
 
 #include <boost/program_options.hpp>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include <opencv2/core.hpp>
 #include <opencv2/core/eigen.hpp>
-#include <opencv2/opencv.hpp>
 #include <opencv2/viz.hpp>
 
 #include "cmg/cmg.hpp"
