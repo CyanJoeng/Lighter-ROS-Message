@@ -1,0 +1,47 @@
+{
+	"cmg": {
+		"log": {
+			"level": "Debug",
+			"file_name": ""
+		},
+		"procs": [
+			{
+				"name": "data",
+				"ip": "172.18.135.110",
+				"topics": [
+					"image_raw",
+					"imu_raw",
+					"ephem",
+					"glo_ephem",
+					"meas",
+					"iono_params"
+				]
+			},
+			{
+				"name": "station",
+				"ip": "172.18.135.33",
+				"topics": [
+					"match",
+					"odometry"
+				]
+			},
+			{
+				"name": "feature_tracker",
+				"ip": "172.18.135.110",
+				"topics": [
+					"feature",
+					"feature_img",
+					"restart"
+				]
+			},
+			{
+				"name": "estimator",
+				"ip": "172.18.135.110",
+				"topics": [
+					"odometry"
+				]
+			}
+		]
+	},
+	"gvins_cfg": "visensor_left_f9p_config.yaml"
+}
