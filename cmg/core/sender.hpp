@@ -12,6 +12,7 @@
 
 #include "cmg/message/message.hpp"
 #include "cmg/core/socket.hpp"
+#include "cmg/utils/log.hpp"
 
 namespace cmg {
 

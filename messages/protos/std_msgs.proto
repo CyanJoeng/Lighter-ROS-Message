@@ -10,8 +10,3 @@ message Header {
 	string frame_id = 3;
 }
 
-message StampedFloat64Array {
-	
-	Header header = 1;
-	repeated double data = 2;
-}

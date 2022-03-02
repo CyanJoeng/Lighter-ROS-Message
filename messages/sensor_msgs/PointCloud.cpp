@@ -5,6 +5,7 @@
 #include "PointCloud.hpp"
 #include <cstdio>
 
+#include "cmg/utils/log.hpp"
 #include "sensor_msgs.pb.h"
 
 namespace cmg { namespace sensor_msgs {

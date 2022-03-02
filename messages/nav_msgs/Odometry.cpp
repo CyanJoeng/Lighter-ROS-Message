@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "cmg/message/codex.hpp"
+#include "cmg/utils/log.hpp"
 #include "nav_msgs.pb.h"
 
 namespace cmg { namespace nav_msgs {

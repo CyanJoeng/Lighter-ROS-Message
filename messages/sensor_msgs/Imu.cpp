@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "cmg/message/codex.hpp"
+#include "cmg/utils/log.hpp"
 #include "sensor_msgs.pb.h"
 
 namespace cmg { namespace sensor_msgs {

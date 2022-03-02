@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "cmg/message/codex.hpp"
+#include "cmg/utils/log.hpp"
 #include "example.pb.h"
 
 namespace cmg { namespace example_msgs {
