@@ -48,7 +48,7 @@ namespace cmg { namespace sensor_msgs{
         }
 
         //msg_data = Codex::encode64(msg_data);
-        msg_data = Zip::compress(msg_data);
+//        msg_data = Zip::compress(msg_data);
         out.write(msg_data.data(), msg_data.length());
 
         return msg_data.length();
@@ -72,7 +72,7 @@ namespace cmg { namespace sensor_msgs{
         std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
 
         std::string msg_data = ss.str();
-        msg_data = Zip::decompress(msg_data);
+//        msg_data = Zip::decompress(msg_data);
         //msg_data = Codex::decode64(msg_data);
 
         if (!msg.ParseFromString(msg_data)) {

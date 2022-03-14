@@ -12,6 +12,13 @@
 
 namespace cmg {
 
+	static constexpr unsigned BASE_PORT = 39527;
+
+	static constexpr auto PROTO = "tcp://";
+
+	static constexpr auto LOCAL_IP = "0.0.0.0";
+
+
 	std::map<std::string, URL> URL::insts_;
 
 	std::mutex URL::inst_mt_;
@@ -23,14 +30,14 @@ namespace cmg {
 		if (URL::insts_.end() == it) {
 
 			std::stringstream ss;
-			ss << "Process not registed: " << URL::Key(name, topic);
+			ss << "Process not registered: " << URL::Key(name, topic);
 			throw std::out_of_range(ss.str());
 		}
 
 		return it->second;
 	};
 
-	auto URL::RegistProc(const std::string &proc_name, const std::string &topic, const std::string &address) -> URL& {
+	auto URL::RegisterProc(const std::string &proc_name, const std::string &topic, const std::string &address) -> URL& {
 
 		std::lock_guard<std::mutex> lck(URL::inst_mt_);
 
@@ -40,14 +47,14 @@ namespace cmg {
 		new_inst.net_port_ = BASE_PORT + URL::insts_.size();
 		new_inst.tcp_url_ = URL::BuildUrl(address, new_inst.net_port_);
 
-		CMG_INFO("[URL]regist /%s/%s -> %s", new_inst.proc_name_.c_str(), topic.c_str(), new_inst.tcp_url_.c_str());
+		CMG_INFO("[URL]register /%s/%s -> %s", new_inst.proc_name_.c_str(), topic.c_str(), new_inst.tcp_url_.c_str());
 
 		return new_inst;
 	}
 
-    auto URL::BuildUrl(const std::string &address, unsigned port) -> const std::string {
+    auto URL::BuildUrl(const std::string &address, unsigned port) -> std::string {
 
-		return URL::PROTO + address + ":" + std::to_string(port);
+		return PROTO + address + ":" + std::to_string(port);
 	}
 
 	auto URL::Key(const std::string& proc_name, const std::string &topic) -> std::string {
@@ -74,6 +81,6 @@ namespace cmg {
 
 	auto URL::bindUrl() const -> std::string {
 
-		return URL::BuildUrl(URL::LOCAL_IP, this->net_port_);
+		return URL::BuildUrl(LOCAL_IP, this->net_port_);
 	}
 }

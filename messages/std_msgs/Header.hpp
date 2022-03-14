@@ -24,7 +24,7 @@ namespace cmg { namespace std_msgs {
             double operator= (const double t) {
 
                 this->sec = t;
-                this->nsec = uint64_t(t * 1e9) % 1000000;
+                this->nsec = uint64_t(t * 1e9) % uint64_t(1e9);
 
                 return t;
             }

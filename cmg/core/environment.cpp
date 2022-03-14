@@ -60,6 +60,7 @@ namespace cmg {
 
 				return Environment::env_insts_.empty();
 			});
+		lck.unlock();
 	}
 
 	void Environment::Close(const Environment &env) {

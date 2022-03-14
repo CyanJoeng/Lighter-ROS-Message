@@ -55,7 +55,7 @@ namespace cmg { namespace nav_msgs {
 
         cmg_pb::Odometry msg;
 
-        std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
+        auto &ss = dynamic_cast<std::stringstream&>(in);
 
         std::string msg_data = ss.str();
         msg_data = Codex::decode64(msg_data);

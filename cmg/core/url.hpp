@@ -16,18 +16,11 @@ namespace cmg {
 	class URL {
 
 	public:
-		static constexpr unsigned BASE_PORT = 9527;
-
-		static constexpr auto PROTO = "tcp://";
-
-		static constexpr auto LOCAL_IP = "0.0.0.0";
-
-	public:
 		static auto Inst(const std::string& proc_name, const std::string &topic) -> URL&;
 
-		static auto RegistProc(const std::string &proc_name, const std::string &topic, const std::string &address) -> URL&;
+		static auto RegisterProc(const std::string &proc_name, const std::string &topic, const std::string &address) -> URL&;
 
-		static auto BuildUrl(const std::string &address, unsigned port) -> const std::string;
+		static auto BuildUrl(const std::string &address, unsigned port) -> std::string;
 
 	private:
 		static auto Key(const std::string& proc_name, const std::string &topic) -> std::string;

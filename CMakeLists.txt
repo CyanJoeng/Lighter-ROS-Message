@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 find_package(nanomsg REQUIRED)
 find_package(Boost 1.75.0 COMPONENTS iostreams filesystem
-	HINTS ${Boost_DIR})
+	HINTS ${Boost_DIR} QUIET)
 
 if (NOT Boost_FOUND)
 	message("set Boost manually")

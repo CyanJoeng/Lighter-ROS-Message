@@ -137,16 +137,11 @@ namespace cmg {
 
 		auto receive_job = [this, use_topic]() {
 
-			if (this->exit_receive_) {
-
-			    printf("start with exit\n");
-			}
+			std::string tag = this->url_.name() + "/" + this->url_.topic();
 
 			while (true) {
 
 				if (this->exit_receive_) {
-
-					printf("exit with condi\n");
 					break;
 				}
 
@@ -157,12 +152,12 @@ namespace cmg {
 
 					auto recv_topic = std::string((char*)buf);
 					recv_topic = recv_topic.substr(0, recv_topic.find('\n'));
-					CMG_INFO("[Socket](receive_job) receive len %d topic %s", len, recv_topic.c_str());
+					CMG_INFO("[Socket](receive_job)%s: receive len %d topic %s", tag.c_str(), len, recv_topic.c_str());
 				}
 				if (len < 0) {
 
 					auto error_str = nn_strerror(nn_errno());
-					CMG_ERROR("[Socket](receive_job) receive failed (%s)", error_str);
+					CMG_ERROR("[Socket](receive_job)%s: receive failed (%s)", tag.c_str(), error_str);
 					continue;
 				}
 
@@ -173,7 +168,7 @@ namespace cmg {
 					auto code = ntohl(*reinterpret_cast<const uint32_t*>(msg));
 					if (code == Socket::CODE_EXIT) {
 
-						CMG_INFO("[Socket](receive_job) receive exit code %d", code);
+						CMG_INFO("[Socket](receive_job)%s: receive exit code %d", tag.c_str(), code);
 						break;
 					}
 				}
@@ -185,7 +180,7 @@ namespace cmg {
 				nn_freemsg(buf);
 			}
 
-			CMG_INFO("[Socket](receive_job) exit");
+			CMG_INFO("[Socket](receive_job)%s: exit", tag.c_str());
 		};
 
 		this->stopReceive();

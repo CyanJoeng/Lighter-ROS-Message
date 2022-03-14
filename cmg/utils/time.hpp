@@ -13,7 +13,7 @@ namespace cmg {
 	public:
 		struct TimePoint {
 
-			using TP = std::chrono::time_point<std::chrono::steady_clock>;
+			using TP = std::chrono::time_point<std::chrono::system_clock>;
 
 			TP tp_;
 
@@ -29,7 +29,7 @@ namespace cmg {
 	public:
 		static auto now() -> TimePoint {
 
-			return std::chrono::steady_clock::now();
+			return std::chrono::system_clock::now();
 		}
 
         static auto diff(const TimePoint &_1, const TimePoint &_2) -> double {

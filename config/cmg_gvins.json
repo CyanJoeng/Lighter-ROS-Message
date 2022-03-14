@@ -7,7 +7,7 @@
 		"procs": [
 			{
 				"name": "data",
-				"ip": "172.18.135.33",
+				"ip": "0.0.0.0",
 				"topics": [
 					"image_raw",
 					"imu_raw",
@@ -15,6 +15,14 @@
 					"glo_ephem",
 					"meas",
 					"iono_params"
+				]
+			},
+			{
+				"name": "local",
+				"ip": "0.0.0.0",
+				"topics": [
+					"image_raw",
+					"imu_raw"
 				]
 			},
 			{
@@ -39,7 +47,9 @@
 				"ip": "0.0.0.0",
 				"topics": [
 					"odometry",
-                    "point_cloud"
+                    "point_cloud",
+					"keyframe",
+					"camera_pose"
 				]
 			}
 		]

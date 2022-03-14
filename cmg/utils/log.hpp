@@ -35,8 +35,10 @@ namespace cmg {
 
 		LogType type_;
 
+		std::string tag_;
+
 	public:
-		Log(LogType type) : type_(type) {}
+		Log(LogType type, const std::string &tag) : type_(type), tag_("{" + tag + "}") {}
 
 		Log(const Log &inst) {
 
@@ -47,12 +49,15 @@ namespace cmg {
 
 		auto operator() () -> Log& {
 
-			*this << "[CMG](" << LogStrOfType[type_] << ") ";
+			*this << "(" << LogStrOfType[type_] << ") " << tag_ << " ";
 			return *this;
 		}
 
 		template <typename... Args>
 		void operator() (const char *fmt, Args... args) {
+
+		    if (this->type_ < Log::level_)
+				return;
 
 			(*this)();
 
@@ -73,23 +78,25 @@ namespace cmg {
 		static void setPrinter(const std::function<void (const std::string&)> &printer, LogType level = Log::level_);
 
 
-		static auto Info() -> Log { return {LogType::INFO}; }
+		static auto Info(const std::string &tag) -> Log { return {LogType::INFO, tag}; }
 
-		static auto Debug() -> Log { return {LogType::DEBUG}; }
+		static auto Debug(const std::string &tag) -> Log { return {LogType::DEBUG, tag}; }
 
-		static auto Warn() -> Log { return {LogType::WARN}; }
+		static auto Warn(const std::string &tag) -> Log { return {LogType::WARN, tag}; }
 
-		static auto Error() -> Log { return {LogType::ERROR}; }
+		static auto Error(const std::string &tag) -> Log { return {LogType::ERROR, tag}; }
 	};
 }
 
-#define CMG_INFO_STREAM cmg::Log::Info()
-#define CMG_DEBUG_STREAM cmg::Log::Debug()
-#define CMG_WARN_STREAM cmg::Log::Warn()
-#define CMG_ERROR_STREAM cmg::Log::Error()
+#define TAG ""
+
+#define CMG_INFO_STREAM cmg::Log::Info(TAG)
+#define CMG_DEBUG_STREAM cmg::Log::Debug(TAG)
+#define CMG_WARN_STREAM cmg::Log::Warn(TAG)
+#define CMG_ERROR_STREAM cmg::Log::Error(TAG)
 
 
-#define CMG_INFO cmg::Log {cmg::LogType::INFO}
-#define CMG_DEBUG cmg::Log {cmg::LogType::DEBUG}
-#define CMG_WARN cmg::Log {cmg::LogType::WARN}
-#define CMG_ERROR cmg::Log {cmg::LogType::ERROR}
+#define CMG_INFO cmg::Log {cmg::LogType::INFO, TAG}
+#define CMG_DEBUG cmg::Log {cmg::LogType::DEBUG, TAG}
+#define CMG_WARN cmg::Log {cmg::LogType::WARN, TAG}
+#define CMG_ERROR cmg::Log {cmg::LogType::ERROR, TAG}

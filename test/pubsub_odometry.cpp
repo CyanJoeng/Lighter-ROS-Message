@@ -83,6 +83,7 @@ void ui_refresh() {
 
 			window->showWidget(name_odo, *widget_odo);
 			window->showWidget("Cam", cam, cam_pose);
+			lck.unlock();
 		}
 
 		window->spinOnce();

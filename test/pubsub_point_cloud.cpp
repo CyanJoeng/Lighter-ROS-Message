@@ -127,6 +127,7 @@ void ui_refresh() {
 			widget_cv.wait(lck, []() {
 					return !widget_pts.empty();
 					});
+			lck.unlock();
 
 			window->showWidget(name_pts, *widget_pts.front());
 			window->showWidget(name_pts + "_hist", *widget_pts.back());

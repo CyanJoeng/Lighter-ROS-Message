@@ -45,7 +45,7 @@ namespace cmg {
 
 				for (auto &topic : topics) {
 
-					cmg::URL::RegistProc(proc_name, topic, ip);
+                    cmg::URL::RegisterProc(proc_name, topic, ip);
                 }
             }
 
@@ -61,7 +61,7 @@ namespace cmg {
 			for (auto topic : proc.at("topics").as_array()) {
 
 //				CMG_DEBUG("[CMG][config] proc %s\t topic %s\t ip %s", proc_name.c_str(), topic.as_string().c_str(), ip.c_str());
-				cmg::URL::RegistProc(proc_name, topic.as_string().c_str(), ip);
+                cmg::URL::RegisterProc(proc_name, topic.as_string().c_str(), ip);
 			}
 		}
 

@@ -67,6 +67,7 @@ void ui_refresh() {
                     });
 
             cv::imshow("callback", show_img);
+            lck.unlock();
         }
 
         cv::waitKey(1);
