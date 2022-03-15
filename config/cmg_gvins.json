@@ -22,7 +22,8 @@
 				"ip": "0.0.0.0",
 				"topics": [
 					"image_raw",
-					"imu_raw"
+					"imu_raw",
+					"gps_lla"
 				]
 			},
 			{
