@@ -49,7 +49,7 @@ namespace cmg {
 			CMG_ERROR("socket bind failed: (bind to %s %s)", socket->url_().c_str(), error_str);
 			throw std::runtime_error(error_str);
 		}
-		CMG_INFO("[Socket](Server) bind: %s (%s)", bind_url.c_str(), socket->url_.topic().c_str());
+		//CMG_INFO("[Socket](Server) bind: %s (%s)", bind_url.c_str(), socket->url_.topic().c_str());
 
 		return socket;
 	}
@@ -88,7 +88,7 @@ namespace cmg {
 			CMG_ERROR("socket connect failed (%s)", error_str);
 			throw std::runtime_error(error_str);
 		}
-		CMG_INFO("[Socket](Client) connect: %s", socket->url_().c_str());
+        //CMG_INFO("[Socket](Client) connect: %s", socket->url_().c_str());
 
 		return socket;
 	}
@@ -121,7 +121,7 @@ namespace cmg {
 				CMG_ERROR("socket set topic failed (%s)", error_str);
 				throw std::runtime_error(error_str);
 			}
-			CMG_INFO("[Socket](startReceive) client set topic: %s", topic.data());
+			//CMG_INFO("[Socket](startReceive) client set topic: %s", topic.data());
 		}
 		{
 			int recv_max_size = -1;
@@ -132,7 +132,7 @@ namespace cmg {
 				CMG_ERROR("socket set recv max size failed (%s)", error_str);
 				throw std::runtime_error(error_str);
 			}
-			CMG_INFO("[Socket](startReceive) client set recv max size: %d", recv_max_size);
+			//CMG_INFO("[Socket](startReceive) client set recv max size: %d", recv_max_size);
 		}
 
 		auto receive_job = [this, use_topic]() {

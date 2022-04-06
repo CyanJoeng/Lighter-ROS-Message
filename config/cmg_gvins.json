@@ -1,59 +1,47 @@
 {
-	"cmg": {
-		"log": {
-			"level": "Debug",
-			"file_name": ""
-		},
-		"procs": [
-			{
-				"name": "data",
-				"ip": "0.0.0.0",
-				"topics": [
-					"image_raw",
-					"imu_raw",
-					"ephem",
-					"glo_ephem",
-					"meas",
-					"iono_params"
-				]
-			},
-			{
-				"name": "local",
-				"ip": "0.0.0.0",
-				"topics": [
-					"image_raw",
-					"imu_raw",
-					"gps_lla"
-				]
-			},
-			{
-				"name": "station",
-				"ip": "172.18.135.33",
-				"topics": [
-					"match",
-					"odometry"
-				]
-			},
-			{
-				"name": "feature_tracker",
-				"ip": "0.0.0.0",
-				"topics": [
-					"feature",
-					"feature_img",
-					"restart"
-				]
-			},
-			{
-				"name": "estimator",
-				"ip": "0.0.0.0",
-				"topics": [
-					"odometry",
+    "cmg": {
+        "log": {
+            "level": "Debug",
+            "file_name": ""
+        },
+        "procs": [
+            {
+                "name": "data",
+                "ip": "0.0.0.0",
+                "topics": [
+                    "image_raw",
+                    "imu_raw",
+
+                    "ephem",
+                    "glo_ephem",
+                    "meas",
+                    "iono_params",
+
+                    "gps_lla"
+                ]
+            },
+            {
+                "name": "feature_tracker",
+                "ip": "0.0.0.0",
+                "topics": [
+                    "feature",
+                    "feature_img",
+                    "restart"
+                ]
+            },
+            {
+                "name": "estimator",
+                "ip": "0.0.0.0",
+                "topics": [
+                    "odometry",
                     "point_cloud",
-					"keyframe",
-					"camera_pose"
-				]
-			}
-		]
-	},
-	"gvins_cfg": "visensor_left_f9p_config.yaml"
+                    "keyframe",
+                    "camera_pose",
+                    "window_frames",
+                    "anc_pose"
+                ]
+            }
+        ]
+    },
+    "gvins_cfg": "visensor_left_f9p_config.yaml"
 }

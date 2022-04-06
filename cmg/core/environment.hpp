@@ -69,6 +69,9 @@ namespace cmg {
 		template <typename Msg>
 		auto sender(const std::string &topic, unsigned wait) -> std::shared_ptr<Sender> {
 
+
+			CMG_INFO("[Environment] sender (%s) <== [%s]", this->proc_name_.c_str(), topic.c_str());
+
 			if (this->servers_.end() == this->servers_.find(topic)) {
 
 				auto server = Socket::Server(URL::Inst(this->proc_name_, topic));
@@ -83,30 +86,13 @@ namespace cmg {
 		template <typename Msg>
 		auto receiver(const std::string &proc_name_topic, unsigned wait, const Receiver::Callback<Msg> &callback) -> std::shared_ptr<Receiver> {
 
-			CMG_INFO("[Environment] receiver proc_topic %s", proc_name_topic.c_str());
-
 			std::vector<std::string> strs;
 			boost::split(strs, proc_name_topic, boost::is_any_of("/"));
-
-			//std::string str = proc_name_topic;
-			//while (!str.empty()) {
-
-				//auto pos = str.find('/');
-				//if (pos != -1) {
-
-					//strs.push_back(str.substr(0, pos));
-					//str = str.substr(pos + 1);
-				//} else {
-
-					//strs.push_back(str);
-					//break;
-				//}
-			//}
 
 			auto &server_proc_name = strs[1];
 			auto &topic = strs.back();
 
-			CMG_INFO("[Environment] receiver %s connect to %s/%s",
+			CMG_INFO("[Environment] receiver (%s) ==> %s/%s",
 				this->proc_name_.c_str(), server_proc_name.c_str(), topic.c_str());
 
 			if (this->clients_.end() == this->clients_.find(topic)) {

@@ -88,7 +88,7 @@ auto draw_point_cloud(const cmg::sensor_msgs::PointCloudConstPtr &cloud) -> std:
     hist_pts.insert(hist_pts.end(), pts.begin(), pts.end());
 
     cv::Affine3d pose;
-    if (cloud->channels.size() == 2) {
+    if (cloud->channels.size() >= 2) {
 
         auto &pos = cloud->channels[0].values;
         auto &ori = cloud->channels[1].values;
@@ -127,11 +127,12 @@ void ui_refresh() {
 			widget_cv.wait(lck, []() {
 					return !widget_pts.empty();
 					});
-			lck.unlock();
 
 			window->showWidget(name_pts, *widget_pts.front());
 			window->showWidget(name_pts + "_hist", *widget_pts.back());
 			window->showWidget("Cam", cam, cam_pose);
+
+			lck.unlock();
 		}
 
 		window->spinOnce();

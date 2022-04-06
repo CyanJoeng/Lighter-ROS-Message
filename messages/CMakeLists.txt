@@ -12,6 +12,7 @@ include_directories(${PROJECT_BINARY_DIR})
 
 add_library(${PROJECT_NAME} SHARED
 	foo_bar.cpp
+	std_msgs/Array.cpp
 	nav_msgs/Odometry.cpp
 	sensor_msgs/Image.cpp
 	sensor_msgs/Imu.cpp

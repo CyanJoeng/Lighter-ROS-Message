@@ -3,7 +3,7 @@ project(CMG)
 
 option(CMG_BUILD_APPS "build CMG test apps" OFF)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 find_package(nanomsg REQUIRED)

@@ -41,15 +41,19 @@ namespace cmg {
 
 		std::lock_guard<std::mutex> lck(URL::inst_mt_);
 
-		auto &new_inst = URL::insts_[URL::Key(proc_name, topic)];
-		new_inst.proc_name_ = proc_name;
-		new_inst.topic_ = topic;
-		new_inst.net_port_ = BASE_PORT + URL::insts_.size();
-		new_inst.tcp_url_ = URL::BuildUrl(address, new_inst.net_port_);
+        auto key = URL::Key(proc_name, topic);
+        if (!URL::insts_.count(key)) {
 
-		CMG_INFO("[URL]register /%s/%s -> %s", new_inst.proc_name_.c_str(), topic.c_str(), new_inst.tcp_url_.c_str());
+            auto &new_inst = URL::insts_[key];
+            new_inst.proc_name_ = proc_name;
+            new_inst.topic_ = topic;
+            new_inst.net_port_ = BASE_PORT + URL::insts_.size();
+            new_inst.tcp_url_ = URL::BuildUrl(address, new_inst.net_port_);
 
-		return new_inst;
+            CMG_INFO("[URL]register /%s/%s -> %s", new_inst.proc_name_.c_str(), topic.c_str(), new_inst.tcp_url_.c_str());
+        }
+
+		return URL::insts_[key];
 	}
 
     auto URL::BuildUrl(const std::string &address, unsigned port) -> std::string {

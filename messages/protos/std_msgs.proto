@@ -10,3 +10,8 @@ message Header {
 	string frame_id = 3;
 }
 
+message ArrayMsg {
+
+    Header header = 1;
+    repeated string msg_list = 2;
+}

@@ -95,7 +95,7 @@ namespace cmg {
 			auto log_file = node_log.at("file_name").as_string();
 			if (!log_file.empty()) {
 
-				auto log_file_path = boost::filesystem::path(log_file.c_str());
+				auto log_file_path = boost::filesystem::path(this->root_dir_) / log_file.c_str();
 				auto dir_path = log_file_path.parent_path();
 
 				if (!boost::filesystem::exists(dir_path)) {

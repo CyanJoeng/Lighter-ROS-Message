@@ -76,8 +76,8 @@ int main(int argc, char *argv[]) {
 
 		cmg::NodeHandle n("~");
 
-		auto pub_foo = n.advertise<cmg::StrMessage>("foo", 1000);
-		auto pub_bar = n.advertise<cmg::StrMessage>("bar", 1000);
+		auto pub_foo = n.advertise<cmg::RawMessage>("foo", 1000);
+		auto pub_bar = n.advertise<cmg::RawMessage>("bar", 1000);
 
 		for (auto i = 0; i < 1000;++i) {
 

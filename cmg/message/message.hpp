@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <ios>
 #include <iostream>
+#include <list>
+#include <memory>
 #include <string>
 
 namespace cmg {
@@ -21,19 +23,22 @@ namespace cmg {
 		virtual auto parse(std::istream &in) -> unsigned long = 0;
 	};
 
+    using MessageConstPtr = std::shared_ptr<const Message>;
+    using MessagePtr = std::shared_ptr<Message>;
 
-	class StrMessage : public Message {
+
+	class RawMessage : public Message {
 
 	public:
 		std::string data_;
 
 	public:
-		StrMessage() = default;
+		RawMessage() = default;
 
-		StrMessage(const std::string &str)
+		RawMessage(const std::string &str)
 			: data_(str) {}
 
-		~StrMessage() {}
+		~RawMessage() {}
 
 		virtual auto serialize(std::ostream &out) const -> unsigned long final {
 
