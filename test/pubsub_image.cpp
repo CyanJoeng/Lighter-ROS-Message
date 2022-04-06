@@ -12,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "cmg/cmg.hpp"
+#include "cmg/utils/time.hpp"
 #include "messages/sensor_msgs/Image.hpp"
 
 using namespace cmg;
@@ -24,16 +25,24 @@ auto draw_odo(const std::string &img_path) -> sensor_msgs::Image {
 
     //image->header;  // img_msg->header;
     image.header.frame_id = "world";
-    image.header.stamp = (rand() % 1000 * 1e-3);
+    image.header.stamp = cmg::Time::now().toSec();
 
     static auto ori_img = cv::imread(img_path, cv::IMREAD_ANYCOLOR);
 
-    cv::Mat img = ori_img.clone();
+    cv::Point rand_pt(rand() % (ori_img.cols - 30), rand() % (ori_img.rows - 30));
 
-    printf("cv point %d\n", img.rows/2);
-    cv::putText(img, "stamp: " + std::to_string(image.header.stamp.toSec()), cv::Point(0, img.rows / 2), 0, 1., cv::Scalar {255, 255, 0}, 2);
+    cv::Mat img;
+    ori_img.copyTo(img);
 
-    img(cv::Rect(0, 0, 30, 30)) = cv::Mat::ones(30, 30, CV_8UC3) * 128;
+    std::cout << "value mean: " << cv::mean(img) << std::endl;
+
+    cv::Mat(30, 30, CV_8UC3, {128, 128, 128}).copyTo(img(cv::Rect(rand_pt.x, rand_pt.y, 30, 30)));
+
+    cv::putText(img, "stamp: " + std::to_string(image.header.stamp.toSec()), rand_pt, 0, 0.6, cv::Scalar {255, 255, 0}, 2);
+
+    std::cout << "value mean: " << cv::mean(img) << std::endl;
+
+    printf("cv point (%d, %d)\n", rand_pt.x, rand_pt.y);
 
     cv::Mat data;
     img.copyTo(data);

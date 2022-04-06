@@ -11,8 +11,6 @@
 #include <thread>
 #include <condition_variable>
 
-#include <boost/program_options.hpp>
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
@@ -23,13 +21,13 @@
 #include "cmg/cmg.hpp"
 #include "messages/nav_msgs/Odometry.hpp"
 
+#include "arg_parse.hpp"
+
 using namespace cmg;
-namespace po = boost::program_options;
 
 using Widget = cv::viz::WPolyLine;
 using WidgetPtr = std::shared_ptr<Widget>;
 
-static std::string img_path;
 static constexpr auto name_odo = "odometry";
 
 
@@ -108,43 +106,6 @@ auto cb(const cmg::nav_msgs::OdometryConstPtr &odometry) {
 	widget_cv.notify_all();
 }
 
-auto args_parser(int argc, char *argv[]) -> po::variables_map {
-
-	po::options_description desc("Socket connection test demo");
-	desc.add_options()
-		("help", "print this message")
-		("mode", po::value<char>()->required(), "socker mode")
-		("proc", po::value<std::string>()->default_value("server"), "server proc name")
-		("topic", po::value<std::string>()->default_value("foo"), "topic name")
-		("cfg", po::value<std::string>()->default_value(""), "config file")
-		("bg_image", po::value<std::string>()->default_value(""), "background image of canvas")
-		("gl", po::value<bool>()->default_value(true), "enable opengl window");
-
-	po::positional_options_description pos_desc;
-	pos_desc.add("mode", 1);
-		
-	po::command_line_parser parser = po::command_line_parser(argc, argv).options(desc).positional(pos_desc);
-
-	po::variables_map vm;
-	po::store(parser.run(), vm);
-	po::notify(vm);
-
-	if (vm.count("help") || !vm.count("mode")) {
-
-		std::cout << "Usage: " << argv[0] << " ";
-		for (auto i = 0; i < pos_desc.max_total_count(); ++i)
-			std::cout << pos_desc.name_for_position(i) << " ";
-		std::cout << "[options]" << std::endl;
-		
-		std::cout << desc << std::endl;
-		exit(0);
-	}
-
-	img_path = vm["bg_image"].as<std::string>();
-
-	return vm;
-}
-
 int main(int argc, char *argv[]) {
 
 	std::string server_proc_name = "server";
@@ -163,8 +124,6 @@ int main(int argc, char *argv[]) {
 	};
 
 	if (mode == 's') {
-
-		std::string img_path = args["image"].as<std::string>();
 
 		cmg::init(2, proc_args, server_proc_name.c_str());
 
@@ -190,7 +149,6 @@ int main(int argc, char *argv[]) {
 		cmg::NodeHandle n("~");
 
 		std::string proc_topic = "/" + proc + "/" + topic;
-
 
 		work_loop = std::thread {[&]() {
 

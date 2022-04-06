@@ -38,7 +38,8 @@
 				"name": "estimator",
 				"ip": "0.0.0.0",
 				"topics": [
-					"odometry"
+					"odometry",
+                    "point_cloud"
 				]
 			}
 		]

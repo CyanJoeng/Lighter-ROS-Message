@@ -19,9 +19,9 @@ namespace cmg {
 
 			TimePoint(const TP &tp) : tp_(tp) {}
 
-			auto toSec() -> double {
+			auto toSec() const -> double {
 
-				return std::chrono::duration_cast<std::chrono::seconds>(
+				return std::chrono::duration<double>(
 						this->tp_.time_since_epoch()).count();
 			}
 		};
@@ -31,5 +31,10 @@ namespace cmg {
 
 			return std::chrono::steady_clock::now();
 		}
+
+        static auto diff(const TimePoint &_1, const TimePoint &_2) -> double {
+
+            return _2.toSec() - _1.toSec();
+        }
 	};
 }
