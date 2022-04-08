@@ -2,6 +2,7 @@
  * Author: Cyan
  * Date: Fri Apr  1 10:29:01 CST 2022
  */
+#include <memory>
 #include <sstream>
 
 #include "cmg/message/message.hpp"
@@ -12,46 +13,35 @@ namespace cmg { namespace std_msgs {
 
     class Array : public Message {
 
-            std::list<std::string> msg_list;
-        
-        public:
-            struct Iter : public std::list<std::string>::iterator {
-                
-                Iter(const std::list<std::string>::iterator &it) : std::list<std::string>::iterator(it) {}
+        std::vector<std::string> msgs_;
 
-                template <typename Msg>
-                auto value() -> Msg {
+    public:
+        Header header;
 
-                    auto data = std::list<std::string>::iterator::operator *();
+    public:
+        auto addMessage(const Message &message) -> std::size_t;
 
-                    std::stringstream ss;
-                    ss << data;
+        auto operator <<(const Message &message) -> Array&;
 
-                    Msg msg;
-                    dynamic_cast<Message&>(msg).parse(ss);
+        virtual auto serialize(std::ostream &out) const -> unsigned long final;
 
-                    return msg;
-                }
-            };
+        virtual auto parse(std::istream &in) -> unsigned long final;
 
-        public:
-            Header header;
+        auto size() const -> std::size_t { return this->msgs_.size(); }
 
-        public:
-            auto addMessage(const Message &message) -> std::size_t;
+        template <typename Msg>
+        auto item(int idx) const -> Msg {
 
-            auto operator <<(const Message &message) -> Array&;
+            std::stringstream ss;
+            ss << this->msgs_.at(idx);
 
-            virtual auto serialize(std::ostream &out) const -> unsigned long final;
+            Msg msg;
+            dynamic_cast<Message&>(msg).parse(ss);
 
-            virtual auto parse(std::istream &in) -> unsigned long final;
+            return msg;
+        }
+    };
 
-            auto begin() -> Iter {
-                return this->msg_list.begin();
-            }
-
-            auto end() -> Iter {
-                return this->msg_list.end();
-            }
-     };
+    using ArrayPtr = std::shared_ptr<Array>;
+    using ArrayConstPtr = std::shared_ptr<const Array>;
 }}

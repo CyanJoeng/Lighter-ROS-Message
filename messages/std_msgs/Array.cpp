@@ -19,9 +19,9 @@ namespace cmg { namespace std_msgs {
 
         std::stringstream ss;
         auto msg_len = message.serialize(ss);
-        this->msg_list.emplace_back(ss.str());
+        this->msgs_.emplace_back(ss.str());
 
-        return this->msg_list.size();
+        return this->msgs_.size();
     }
 
     auto Array::operator <<(const Message &message) -> Array& {
@@ -45,7 +45,7 @@ namespace cmg { namespace std_msgs {
         _header->set_stamp_sec(this->header.stamp.sec);
         _header->set_stamp_nsec(this->header.stamp.nsec);
 
-        for (auto &data : this->msg_list) {
+        for (auto &data : this->msgs_) {
 
             _data_list->Add(data.begin(), data.end());
         }
@@ -85,7 +85,7 @@ namespace cmg { namespace std_msgs {
 
         for (auto &data : array_msg.msg_list()) {
 
-            this->msg_list.emplace_back(data);
+            this->msgs_.emplace_back(data);
         }
 
         return msg_data.length();

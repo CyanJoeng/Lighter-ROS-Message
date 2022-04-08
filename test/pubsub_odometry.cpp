@@ -92,7 +92,7 @@ void ui_refresh() {
 
 static bool save_img = false;
 
-auto cb(const cmg::nav_msgs::OdometryConstPtr &odometry) {
+auto cb_odo(const cmg::nav_msgs::OdometryConstPtr &odometry) {
 
 	auto &position = odometry->pose.position;
 	printf("cb odometry stamp %f (%10.4f %10.4f %10.4f)\n", odometry->header.stamp.toSec(),
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
 
 		work_loop = std::thread {[&]() {
 
-			auto sub = n.subscribe(proc_topic, 1000, cb);
+			auto sub = n.subscribe(proc_topic, 1000, cb_odo);
 			cmg::spin();
 		}};
 		ui_refresh();

@@ -83,7 +83,7 @@ auto draw_point_cloud(const cmg::sensor_msgs::PointCloudConstPtr &cloud) -> std:
     }
 
 	auto cloud_wid = std::make_shared<Widget>(pts, cv::viz::Color::red());
-    auto hist_cloud_wid = std::make_shared<Widget>(hist_pts, cv::viz::Color::white());
+    auto hist_cloud_wid = std::make_shared<Widget>(hist_pts, cv::viz::Color::gray());
 
     hist_pts.insert(hist_pts.end(), pts.begin(), pts.end());
 
