@@ -13,5 +13,5 @@ message Header {
 message ArrayMsg {
 
     Header header = 1;
-    repeated string msg_list = 2;
+    repeated bytes msgs = 2;
 }

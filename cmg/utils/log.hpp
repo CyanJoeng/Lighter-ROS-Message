@@ -5,6 +5,7 @@
 #pragma once
 
 #include <tuple>
+#include <unistd.h>
 #include <vector>
 #include <map>
 #include <sstream>
@@ -29,7 +30,7 @@ namespace cmg {
 
 		class OutFile;
 
-		static LogType level_;
+		static std::map<int, LogType> level_;
 
 		static std::function<void (std::string)> printer_;
 
@@ -56,7 +57,8 @@ namespace cmg {
 		template <typename... Args>
 		void operator() (const char *fmt, Args... args) {
 
-		    if (this->type_ < Log::level_)
+            int pid = getpid();
+		    if (this->type_ < Log::level_[pid])
 				return;
 
 			(*this)();
@@ -75,7 +77,7 @@ namespace cmg {
 
 		static void setOutFile(const std::string &path);
 
-		static void setPrinter(const std::function<void (const std::string&)> &printer, LogType level = Log::level_);
+		static void setPrinter(const std::function<void (const std::string&)> &printer);
 
 
 		static auto Info(const std::string &tag) -> Log { return {LogType::INFO, tag}; }

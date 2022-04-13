@@ -6,7 +6,6 @@
 
 #include <sstream>
 
-#include "cmg/message/codex.hpp"
 #include "cmg/utils/log.hpp"
 #include "nav_msgs.pb.h"
 
@@ -37,32 +36,22 @@ namespace cmg { namespace nav_msgs {
         twist_linear->set_y(this->twist.y);
         twist_linear->set_z(this->twist.z);
 
-        std::string msg_data;
+        if (!msg.SerializeToOstream(&out)) {
 
-        if (!msg.SerializeToString(&msg_data)) {
-
-            CMG_WARN("Image serialize failed\n");
+            CMG_WARN("Odometry serialize failed\n");
             return 0;
         }
 
-        msg_data = Codex::encode64(msg_data);
-        out.write(msg_data.data(), msg_data.length());
-
-        return msg_data.length();
+        return out.tellp();
     }
 
     auto Odometry::parse(std::istream &in) -> unsigned long {
 
         cmg_pb::Odometry msg;
 
-        auto &ss = dynamic_cast<std::stringstream&>(in);
+        if (!msg.ParseFromIstream(&in)) {
 
-        std::string msg_data = ss.str();
-        msg_data = Codex::decode64(msg_data);
-
-        if (!msg.ParseFromString(msg_data)) {
-
-            CMG_WARN("Image parse failed\n");
+            CMG_WARN("Odometry parse failed\n");
             return 0;
         }
 
@@ -82,7 +71,7 @@ namespace cmg { namespace nav_msgs {
         this->twist.y = msg.twist().linear().y();
         this->twist.z = msg.twist().linear().z();
 
-        return msg_data.length();
+        return in.tellg();
     }
 
 }}

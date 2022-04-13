@@ -32,11 +32,12 @@ namespace cmg { namespace std_msgs {
         template <typename Msg>
         auto item(int idx) const -> Msg {
 
+            auto &it = this->msgs_.at(idx);
             std::stringstream ss;
-            ss << this->msgs_.at(idx);
+            ss << it;
 
             Msg msg;
-            dynamic_cast<Message&>(msg).parse(ss);
+            auto msg_len = dynamic_cast<Message&>(msg).parse(ss);
 
             return msg;
         }

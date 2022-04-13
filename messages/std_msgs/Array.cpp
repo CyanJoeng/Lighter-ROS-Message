@@ -38,8 +38,6 @@ namespace cmg { namespace std_msgs {
 
         cmg_pb::ArrayMsg msg;
 
-        auto _data_list = msg.mutable_msg_list();
-
         auto _header = msg.mutable_header();
         _header->set_frame_id(this->header.frame_id);
         _header->set_stamp_sec(this->header.stamp.sec);
@@ -47,35 +45,25 @@ namespace cmg { namespace std_msgs {
 
         for (auto &data : this->msgs_) {
 
-            _data_list->Add(data.begin(), data.end());
+            msg.add_msgs(data);
         }
 
-        std::string msg_data;
+        if (!msg.SerializeToOstream(&out)) {
 
-        if (!msg.SerializeToString(&msg_data)) {
-
-            CMG_WARN("Image serialize failed\n");
+            CMG_WARN("Array serialize failed\n");
             return 0;
         }
 
-        //msg_data = Codex::encode64(msg_data);
-        out.write(msg_data.data(), msg_data.length());
-
-        return msg_data.length();
+        return out.tellp();
     }
 
     auto Array::parse(std::istream &in) -> unsigned long {
 
         cmg_pb::ArrayMsg array_msg;
 
-        std::stringstream &ss = dynamic_cast<std::stringstream&>(in);
+        if (!array_msg.ParseFromIstream(&in)) {
 
-        std::string msg_data = ss.str();
-        //msg_data = Codex::decode64(msg_data);
-
-        if (!array_msg.ParseFromString(msg_data)) {
-
-            CMG_WARN("Image parse failed\n");
+            CMG_WARN("Array parse failed\n");
             return 0;
         }
 
@@ -83,11 +71,11 @@ namespace cmg { namespace std_msgs {
         this->header.stamp.sec = array_msg.header().stamp_sec();
         this->header.stamp.nsec = array_msg.header().stamp_nsec();
 
-        for (auto &data : array_msg.msg_list()) {
+        for (auto &data : array_msg.msgs()) {
 
             this->msgs_.emplace_back(data);
         }
 
-        return msg_data.length();
+        return in.tellg();
     }
 }}

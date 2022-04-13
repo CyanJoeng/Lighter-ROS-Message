@@ -7,14 +7,11 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <unistd.h>
 
 namespace cmg {
 
-	LogType Log::level_ = []() {
-
-		printf("Set Log to WARN Inited\n");
-		return LogType::WARN;
-	}();
+    std::map<int, LogType> Log::level_ = { };
 
 	std::function<void (std::string)> Log::printer_ = [](const std::string& log) {
 
@@ -23,8 +20,9 @@ namespace cmg {
 
 	void Log::setLevel(const LogType &level) {
 
-		Log::level_ = level;
-		CMG_INFO("[Log][setLevel] %s %ld", LogStrOfType[level_].c_str(), &level_);
+        int pid = getpid();
+		Log::level_[pid] = level;
+		CMG_INFO("[Log][setLevel] pid:%d %s %ld", pid, LogStrOfType[level_[pid]].c_str(), &level_);
 	}
 
 	void Log::setLevel(const std::string &level_str) {
@@ -51,15 +49,15 @@ namespace cmg {
 		};
 	}
 
-	void Log::setPrinter(const std::function<void (const std::string&)> &printer, LogType level) {
+	void Log::setPrinter(const std::function<void (const std::string&)> &printer) {
 
 		Log::printer_ = printer;
-		Log::setLevel(level);
 	}
 
 	Log::~Log() {
 
-		if (this->type_ < Log::level_)
+        int pid = getpid();
+		if (this->type_ < Log::level_[pid])
 			return;
 		Log::printer_(this->str());
 	}

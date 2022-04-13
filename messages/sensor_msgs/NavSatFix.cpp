@@ -28,7 +28,7 @@ namespace cmg { namespace sensor_msgs {
 
         if (!msg.SerializeToString(&msg_data)) {
 
-            CMG_WARN("Image serialize failed\n");
+            CMG_WARN("NavSatFix serialize failed\n");
             return 0;
         }
 
@@ -50,7 +50,7 @@ namespace cmg { namespace sensor_msgs {
 
         if (!msg.ParseFromString(msg_data)) {
 
-            CMG_WARN("Image parse failed\n");
+            CMG_WARN("NavSatFix parse failed\n");
             return 0;
         }
 

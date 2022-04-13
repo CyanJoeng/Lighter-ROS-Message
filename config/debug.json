@@ -22,7 +22,7 @@
             },
             {
                 "name": "feature_tracker",
-                "ip": "0.0.0.0",
+                "ip": "192.168.0.105",
                 "topics": [
                     "feature",
                     "feature_img",
@@ -31,7 +31,7 @@
             },
             {
                 "name": "estimator",
-                "ip": "0.0.0.0",
+                "ip": "192.168.0.105",
                 "topics": [
                     "odometry",
                     "point_cloud",
