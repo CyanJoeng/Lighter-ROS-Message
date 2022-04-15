@@ -24,6 +24,10 @@ namespace cmg { namespace sensor_msgs {
 		int channels{0};
 
 		std::vector<char> data;
+
+        Image() = default;
+
+        Image(int rows, int cols, int channels, char *data);
 	
 		virtual auto serialize(std::ostream &out) const -> unsigned long final;
 

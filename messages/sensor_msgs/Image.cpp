@@ -95,6 +95,14 @@ namespace cmg { namespace sensor_msgs{
         return msg_data.length();
     }
 
+
+    Image::Image(int _rows, int _cols, int _channels, char *_data) :
+        rows(_rows), cols(_cols), channels(_channels) {
+
+        this->data.resize(this->rows * this->cols * this->channels);
+        std::copy(_data, _data + this->data.size(), this->data.begin());
+    }
+
     auto Image::setData(int rows, int cols, int channels, char *_data) -> int {
 
         this->rows = rows;
