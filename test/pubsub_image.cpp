@@ -51,7 +51,7 @@ auto draw_odo(const std::string &img_path) -> sensor_msgs::Image {
     return image;
 }
 
-static cv::Mat show_img;
+static std::map<std::string, cv::Mat> show_imgs;
 static std::mutex img_mt;
 static std::condition_variable img_cv;
 static std::thread work_loop;
@@ -63,10 +63,12 @@ void ui_refresh() {
         {
             std::unique_lock<std::mutex> lck(img_mt);
             img_cv.wait(lck, []() {
-                    return !show_img.empty();
+                    return !show_imgs.empty();
                     });
 
-            cv::imshow("callback", show_img);
+            for (auto &[name, image] : show_imgs)
+                cv::imshow(name, image);
+            show_imgs.clear();
             lck.unlock();
         }
 
@@ -80,17 +82,19 @@ auto cb(const std::shared_ptr<const sensor_msgs::Image> &image) {
 
     printf("cb image size (%d, %d) stamp %f\n", image->rows, image->cols, image->header.stamp.toSec());
 
+    cv::Mat img;
+    cv::Mat(image->rows, image->cols, CV_8UC(image->channels), (void*)image->data.data()).copyTo(img);
     {
         std::lock_guard<std::mutex> lock(img_mt);
-        cv::Mat(image->rows, image->cols, CV_8UC(image->channels), (void*)image->data.data()).copyTo(show_img);
+        show_imgs[image->header.frame_id] = img;
     }
     img_cv.notify_all();
 
     if (save_img) {
 
         char path[64];
-        sprintf(path, "out/image_%.5f.png", image->header.stamp.toSec());
-        cv::imwrite(path, show_img);
+        sprintf(path, "out/image_%s_%.5f.png", image->header.frame_id.c_str(), image->header.stamp.toSec());
+        cv::imwrite(path, img);
         printf("write image to image.png\n");
     }
 }

@@ -31,7 +31,8 @@ namespace cmg {
 
 				return it.second == level_str;
 				});
-		Log::setLevel(it->first);
+        if (it != LogStrOfType.end())
+            Log::setLevel(it->first);
 	}
 
 	void Log::setOutFile(const std::string &path) {

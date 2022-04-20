@@ -17,15 +17,6 @@ namespace cmg { namespace sensor_msgs{
 
     auto Image::serialize(std::ostream &out) const -> unsigned long {
 
-#if 0
-        out.write((char*)&this->rows, sizeof(this->rows));
-        out.write((char*)&this->cols, sizeof(this->cols));
-        out.write((char*)&this->channels, sizeof(this->channels));
-        out.write((char*)this->data.data(), this->data.size());
-
-        return out.tellp();
-#endif
-
         cmg_pb::Image msg;
 
         auto header = msg.mutable_header();
@@ -55,17 +46,6 @@ namespace cmg { namespace sensor_msgs{
     }
 
     auto Image::parse(std::istream &in) -> unsigned long {
-
-#if 0
-        in.read((char*)&this->rows, sizeof(this->rows));
-        in.read((char*)&this->cols, sizeof(this->cols));
-        in.read((char*)&this->channels, sizeof(this->channels));
-
-        this->data.resize(this->rows * this->cols * this->channels);
-        in.read((char*)this->data.data(), this->data.size());
-
-        return in.tellg();
-#endif
 
         cmg_pb::Image msg;
 

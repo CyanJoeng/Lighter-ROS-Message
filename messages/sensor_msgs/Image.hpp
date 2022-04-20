@@ -16,8 +16,6 @@ namespace cmg { namespace sensor_msgs {
 
 		std_msgs::Header header;
 
-		//cv::Mat image;
-
 		int rows{0};
 		int cols{0};
 
