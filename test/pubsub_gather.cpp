@@ -17,6 +17,7 @@
 #include <opencv2/viz/types.hpp>
 #include <opencv2/viz/viz3d.hpp>
 #include <opencv2/viz/widgets.hpp>
+#include <opencv2/core/eigen.hpp>
 
 #include <cmg/cmg.hpp>
 
@@ -34,7 +35,15 @@ auto draw_gps_anchor(const cmg::nav_msgs::OdometryConstPtr &anchor) -> cv::viz::
 }
 
 auto draw_window_frames(const std::vector<cmg::nav_msgs::Odometry> &frame_odos) ->
-std::pair<std::vector<cv::viz::WPlane>, cv::viz::WPlane> {
+std::pair<std::vector<cv::viz::WPlane>, cv::viz::WPolyLine> {
+
+    static std::vector<cv::Point3d> hist_points;
+    auto &pos = frame_odos.front().pose.position;
+    auto &ori = frame_odos.front().pose.orientation;
+
+    hist_points.emplace_back(pos.x, pos.y, pos.z);
+
+    cv::viz::WPolyLine hist_odo (hist_points, cv::viz::Color::orange());
 
     std::vector<cv::viz::WPlane> win_frame_views;
 
@@ -50,36 +59,51 @@ std::pair<std::vector<cv::viz::WPlane>, cv::viz::WPlane> {
         win_frame_views.emplace_back(view);
     }
 
-    std::optional<cv::viz::WPlane> anchor_view;
-    {
-        auto &odo = frame_odos.front();
-        auto &pos = odo.pose.position;
-        auto &ori = odo.pose.orientation;
-
-        Eigen::Vector3d norm = Eigen::Quaterniond(ori.w, ori.x, ori.y, ori.z) * Eigen::Vector3d::UnitZ();
-        Eigen::Vector3d newY = Eigen::Quaterniond(ori.w, ori.x, ori.y, ori.z) * Eigen::Vector3d::UnitY();
-        cv::viz::WPlane view({pos.x, pos.y, pos.z}, {norm.x(), norm.y(), norm.z()}, {newY.x(), newY.y(), newY.z()}, {0.5, 0.5}, cv::viz::Color::orange());
-        anchor_view = view;
-    }
-
-    return {win_frame_views, *anchor_view};
+    return {win_frame_views, hist_odo};
 }
+
+auto draw_odo_3d(const cmg::nav_msgs::OdometryConstPtr &odometry) -> std::pair<cv::viz::WPolyLine, cv::Affine3d> {
+
+    static std::vector<cv::Point3d> hist_points;
+    auto &pos = odometry->pose.position;
+    auto &ori = odometry->pose.orientation;
+
+    hist_points.emplace_back(pos.x, pos.y, pos.z);
+
+    auto polyline = cv::viz::WPolyLine(hist_points);
+
+    cv::Affine3d pose;
+    cv::Mat rot;
+    Eigen::Matrix3d m = Eigen::Quaterniond(ori.w, ori.x, ori.y, ori.z).matrix();
+    cv::eigen2cv(m, rot);
+
+    pose.rotation(rot);
+    pose.translation(cv::Vec3d(pos.x, pos.y, pos.z));
+
+    return {polyline, pose};
+}
+
 
 static std::mutex _widget_mt;
 static std::condition_variable _widget_cv;
-static std::list<std::vector<cv::viz::WPlane>> _widget_buf;
-static std::list<cv::viz::WPlane> _widget_hist_odo_buf;
+static std::list<std::vector<cv::viz::WPlane>> _widget_window_frames_buf;
+static std::list<cv::viz::WPolyLine> _widget_window_frame_odo_buf;
 static std::list<cv::viz::WSphere> _widget_anchor_buf;
+static std::list<std::pair<cv::viz::WPolyLine, cv::Affine3d>> _widget_odo_buf;
 
 static constexpr auto name_gather = "gather";
-static std::optional<cv::viz::Viz3d> _window;
+static std::map<std::string, std::optional<cv::viz::Viz3d>> _windows;
 static std::thread _work_loop;
 static bool _loop_exit {false};
 
 void ui_refresh() {
 
-    _window.emplace(name_gather);
-    _window->showWidget("Coord", cv::viz::WCoordinateSystem(10.));
+    for (auto &window_name : {"gps_window_frame", "odo_window_frame"}) {
+
+        auto &_window = _windows[window_name];
+        _window.emplace(window_name);
+        _window->showWidget("Coord", cv::viz::WCoordinateSystem(10.));
+    }
 
     cv::Matx33f K(700, 0, 320, 0, 700, 240, 0, 0);
     auto cam = cv::viz::WCameraPosition(K,  10);
@@ -88,37 +112,47 @@ void ui_refresh() {
 
         std::unique_lock<std::mutex> lck(_widget_mt);
         _widget_cv.wait_for(lck, std::chrono::duration<double>(0.1), []() {
-                return _loop_exit || !_widget_buf.empty() || !_widget_anchor_buf.empty();
+                return _loop_exit || !_widget_window_frames_buf.empty() || !_widget_anchor_buf.empty() || !_widget_odo_buf.empty();
                 });
 
         if (!_loop_exit) {
 
-            if (!_widget_buf.empty()) {
+            if (!_widget_window_frames_buf.empty()) {
 
                 auto window_odo_count = 0;
-                for (auto &odo : _widget_buf.back()) {
+                for (auto &odo : _widget_window_frames_buf.back()) {
 
-                    std::string widget_name = (boost::format("window_frame_odo_%d") % window_odo_count++).str();
-                    _window->showWidget(widget_name, odo);
+                    std::string widget_name = (boost::format("widget_window_frame_%d") % window_odo_count++).str();
+                    _windows["gps_window_frame"]->showWidget(widget_name, odo);
+                    _windows["odo_window_frame"]->showWidget(widget_name, odo);
                 }
-                _widget_buf.clear();
+                _widget_window_frames_buf.clear();
             }
 
-            if (!_widget_hist_odo_buf.empty()) {
+            if (!_widget_window_frame_odo_buf.empty()) {
 
-                std::string widget_name = (boost::format("fixed_odo_%d") % _widget_hist_odo_buf.size()).str();
-                _window->showWidget(widget_name, _widget_hist_odo_buf.back());
+                _windows["gps_window_frame"]->showWidget("widget_frame_odos", _widget_window_frame_odo_buf.back());
+                _windows["odo_window_frame"]->showWidget("widget_frame_odos", _widget_window_frame_odo_buf.back());
+                _widget_window_frame_odo_buf.clear();
             }
 
             if (!_widget_anchor_buf.empty()) {
 
                 int idx = _widget_anchor_buf.size();
-                _window->showWidget("window_gps_anchor_" + std::to_string(idx), _widget_anchor_buf.back());
+                _windows["gps_window_frame"]->showWidget("widget_gps_anchor_" + std::to_string(idx), _widget_anchor_buf.back());
+            }
+
+            if (!_widget_odo_buf.empty()) {
+
+                auto &[widget_odo, camera_pose] = _widget_odo_buf.back();
+                _windows["odo_window_frame"]->showWidget("widget_odo", widget_odo);
+                _widget_odo_buf.clear();
             }
         }
         lck.unlock();
 
-        _window->spinOnce();
+        for (auto &[name, _window] : _windows)
+            _window->spinOnce();
     }
 }
 
@@ -149,11 +183,25 @@ auto cb_window_frames(const cmg::std_msgs::ArrayConstPtr &frames) -> void {
             frames->header.stamp.toSec(), frames->size(),
             front_pos.x, front_pos.y, front_pos.z);
 
-    auto [window_frames_view, odo_view] = draw_window_frames(window_frame_odos);
+    auto [window_frames_view, window_frame_odo_view] = draw_window_frames(window_frame_odos);
     {
         std::lock_guard<std::mutex> lck(_widget_mt);
-        _widget_buf.emplace_back(std::move(window_frames_view));
-        _widget_hist_odo_buf.emplace_back(odo_view);
+        _widget_window_frames_buf.emplace_back(std::move(window_frames_view));
+        _widget_window_frame_odo_buf.emplace_back(window_frame_odo_view);
+    }
+    _widget_cv.notify_all();
+}
+
+auto cb_odo(const cmg::nav_msgs::OdometryConstPtr &odometry) {
+
+    auto &position = odometry->pose.position;
+    printf("cb odometry stamp %f (%10.4f %10.4f %10.4f)\n", odometry->header.stamp.toSec(),
+            position.x, position.y, position.z);
+
+    auto [odo, pose] = draw_odo_3d(odometry);
+    {
+        std::lock_guard<std::mutex> lock(_widget_mt);
+        _widget_odo_buf.emplace_back(std::move(odo), pose);
     }
     _widget_cv.notify_all();
 }
@@ -181,11 +229,13 @@ int main(int argc, char *argv[]) {
 
     std::string topic_window_frames = "/estimator/window_frames";
     std::string topic_gps_anchor = "/estimator/anc_pose";
+    std::string topic_odo = "/estimator/odometry";
 
     _work_loop = std::thread {[&]() {
 
         auto sub_window_frames = n.subscribe(topic_window_frames, 1000, cb_window_frames);
         auto sub_gps_anchor = n.subscribe(topic_gps_anchor, 1000, cb_gps_anchor);
+        auto sub_odo = n.subscribe(topic_odo, 1000, cb_odo);
         cmg::spin();
     }};
     ui_refresh();

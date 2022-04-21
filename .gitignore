@@ -3,3 +3,4 @@ build/
 output
 libs/
 *.csv
+config/client.json
