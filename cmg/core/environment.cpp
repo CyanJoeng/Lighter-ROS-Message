@@ -6,11 +6,13 @@
 
 #include <cstdio>
 #include <list>
+#include <mutex>
+#include <utility>
 #include <algorithm>
 #include <stdexcept>
-#include <mutex>
 #include <condition_variable>
-#include <utility>
+
+#include <boost/algorithm/string.hpp>
 
 
 namespace cmg {
@@ -108,4 +110,15 @@ namespace cmg {
 			throw std::runtime_error("[Environment]Config config not be set correctly");
 		return * Environment::config_;
 	}
+
+    auto Environment::SplitNameTopic(const std::string &proc_name_topic) -> std::vector<std::string> {
+
+        std::vector<std::string> strs;
+        boost::split(strs, proc_name_topic, boost::is_any_of("/"));
+
+        if (strs.empty())
+            return strs;
+
+        return {strs.begin() + 1, strs.end()};
+    }
 }

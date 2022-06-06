@@ -21,5 +21,5 @@ list(APPEND CMG_SRCS  # cmg logic
 	)
 
 add_library(${PROJECT_NAME} SHARED ${CMG_SRCS})
-target_link_libraries(${PROJECT_NAME} ${DEP_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${DEP_LIBS})
 
